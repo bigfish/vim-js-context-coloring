@@ -12,8 +12,13 @@ in his [presentation](http://www.youtube.com/watch?v=dkZFtimgAcM) at YUIConf 201
 When the JSContextColor command is executed, the current buffer is colorized
 according to the scope of the code. The command can either be manually 
 executed or you can configure it to be executde when events occur. 
+Eg. You can add this to your vimrc:
 
-TODO: describe configuration options.
+  augroup JSCC
+      au!
+      au TextChangedI,TextChanged *.js JSContextColor
+  augroup END
+
 
 ##Requirements
 
