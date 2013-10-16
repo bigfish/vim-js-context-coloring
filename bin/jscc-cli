@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+
+/*jshint node:true, strict:false*/
+
+var JSLINT = require("./jslint.js"),
+    options = {
+        evil:true,
+        passfail: false,
+		ass       : true,
+		bitwise   : true,
+		browser   : true,
+		closure   : true,
+		continue  : true,
+		couch     : true,
+		debug     : true,
+		devel     : true,
+		eqeq      : true,
+		evil      : true,
+		forin     : true,
+		indent    :   100,
+		maxerr    : 10000,
+		maxlen    : 1000, 
+		newcap    : true,
+		node      : true,
+		nomen     : true,
+		passfail  : true,
+		plusplus  : true,
+		properties: true,
+		regexp    : true,
+		rhino     : true,
+		unparam   : true,
+		sloppy    : true,
+		stupid    : true,
+		sub       : true,
+		todo      : true,
+		vars      : true,
+		white     : true
+    },
+    input_js = '',
+    lint,
+    data,
+    color_data;
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('data', function(chunk) {
+    input_js += chunk;
+});
+
+process.stdin.on('end', function() {
+    lint = JSLINT(input_js, options);
+	//console.log(JSLINT.errors);
+    data = JSLINT.data();
+    color_data = JSLINT.color(data);
+    process.stdout.write(JSON.stringify(color_data));
+});

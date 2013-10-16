@@ -1884,6 +1884,14 @@ klass:              do {
             this.stop('expected_operator_a');
         },
         warn: function (code, a, b, c, d) {
+        /**************************************************
+         *
+         * NASTY HACK !!!!! disable warn method on token
+         * this is done so that all color data can be
+         * provided even when there are errors /warnings
+         *
+         *************************************************/
+        return;
             if (!this.warning) {
                 this.warning = warn(code, this.line || 0, this.from || 0,
                     a || artifact(this), b, c, d);
