@@ -35,8 +35,8 @@ version of NodeJS, NPM will have been installed automatically.
 
 	npm install
 
-##Testing
+##Configuration
 
-In the repo dir, open vim. Source the test runner:
+To change the colors, in your .vimrc, set the `g:funcjs_colors` variable to a list of colors, eg:
 
-	:so tests/run.vim
+	let g:funcjs_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
