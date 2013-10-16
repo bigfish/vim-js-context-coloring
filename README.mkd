@@ -1,0 +1,37 @@
+#Vim JavaScript Context Coloring
+
+##Description
+
+This is a plugin for the Vim text editor to highlight JavaScript code 
+according to its scope. This was inspired by an idea by Douglas Crockford
+in his [presentation](http://www.youtube.com/watch?v=dkZFtimgAcM) at YUIConf 2012.
+(See from around the 16 minute mark onwards.)
+
+##Usage
+
+When the JSContextColor command is executed, the current buffer is colorized
+according to the scope of the code. The command can either be manually 
+executed or you can configure it to be executde when events occur. 
+
+TODO: describe configuration options.
+
+##Requirements
+
+The plugin relies on Git, NodeJS and NPM being installed. If you have a recent
+version of NodeJS, NPM will have been installed automatically.
+
+##Installation
+
+### Using Pathogen.
+
+1. Clone the repo from GitHub into your 'bundle' directory:
+
+2. In the repo's root directory, run the command:
+
+	npm install
+
+##Testing
+
+In the repo dir, open vim. Source the test runner:
+
+	:so tests/run.vim
