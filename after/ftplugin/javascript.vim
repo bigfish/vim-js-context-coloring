@@ -94,12 +94,12 @@ call JSCC_Enable()
 if g:js_context_colors_usemaps 
 	if !hasmapto('<Plug>JSContextColor')
 		"mnemonic (h)ighlight
-		nnoremap <buffer> <localleader>h :JSContextColor<CR>
+		nnoremap <buffer> <silent> <localleader>h :JSContextColor<CR>
 	endif
 
 	if !hasmapto('<Plug>JSContextColorToggle')
 		"mnemonic (t)oggle
-		nnoremap <buffer> <localleader>t :JSContextColorToggle<CR>
+		nnoremap <buffer> <silent> <localleader>t :JSContextColorToggle<CR>
 	endif
 endif
 
