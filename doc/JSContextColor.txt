@@ -43,6 +43,7 @@ A list of colors to use for nested scope levels in JavaScript code, eg:
 ==============================================================================
 Mapping
 
-By default, <localleader>h is mapped to the JSContextColorToggle command.
+By default, <localleader>h is mapped to the JSContextColor command.
+By default, <localleader>t is mapped to the JSContextColorToggle command.
 
  vim:tw=78:sw=8:ts=8:sts=8:noet:ft=help:norl:
