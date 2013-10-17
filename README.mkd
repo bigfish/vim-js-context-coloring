@@ -5,38 +5,80 @@
 This is a plugin for the Vim text editor to highlight JavaScript code 
 according to its scope. This was inspired by an idea by Douglas Crockford
 in his [presentation](http://www.youtube.com/watch?v=dkZFtimgAcM) at YUIConf 2012.
-(See from around the 16 minute mark onwards.)
+(See from around the 16 minute mark onwards.) The plugin uses a version of
+[JSLint](https://github.com/douglascrockford/JSLint/) which outputs color data based on the nesting of functions. It does not
+require that you use JSLint as your linter for JS.
+
+##Other implementations
+See [this discussion on Google Plus](https://plus.google.com/118095276221607585885/posts/FzKnHk96m2C)
+for information on other implementations.
 
 ##Usage
 
-When the JSContextColor command is executed, the current buffer is colorized
-according to the scope of the code. The command can either be manually 
-executed or you can configure it to be executde when events occur. 
-Eg. You can add this to your vimrc:
+When the `JSContextColor` command is executed, the current buffer is colorized
+according to the scope of the code. By default this will happen when a JavaScript
+file is loaded, and whenever the file is changed. If you disable the plugin (see below),
+you could arrange to call the `JSContextColor` command in response to a keymap of
+your choice. Here is a summary of the commands available:
 
-  augroup JSCC
-      au!
-      au TextChangedI,TextChanged *.js JSContextColor
-  augroup END
+##Commands
 
+    JSContextColor
+    JSContextColorToggle
+    JSContextColorUpdate
+
+##Global Variables
+
+    g:js_context_colors_enabled
+    g:js_context_colors
 
 ##Requirements
 
-The plugin relies on Git, NodeJS and NPM being installed. If you have a recent
-version of NodeJS, NPM will have been installed automatically.
+The plugin relies on [NodeJS](http://nodejs.org/) being installed, preferably > 0.10.
+
+The command line script which runs jslint in Node to obtain the coloring data 
+requires a Unix-like environment to work. This means it's probably not going to work
+on Windows, unless inside Cygwin or something like that. 
 
 ##Installation
 
 ### Using Pathogen.
 
+0. install [Pathogen](https://github.com/tpope/vim-pathogen)
+
 1. Clone the repo from GitHub into your 'bundle' directory:
 
-2. In the repo's root directory, run the command:
+    git clone git@github.com:bigfish/vim-js-context-coloring.git
 
-	npm install
+2. Install docs (in Vim):
+
+    :Helptags
 
 ##Configuration
 
-To change the colors, in your .vimrc, set the `g:funcjs_colors` variable to a list of colors, eg:
+By default the plugin is enabled for all .js files. The highlighting will be applied
+whenever a change is made to the text, whether in Normal or Insert mode. Note that it
+will only be done *after* Insert mode is exited (back to Normal mode) so it will not 
+update as you type.
 
-	let g:funcjs_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+###Colors
+
+To change the colors used, set the `g:js_context_colors` variable to a list of colors, eg:
+
+	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+
+Note that the color changes will not take effect immediately. To update the colors, you
+can use the `JSContextColorUpdate` command.
+
+Currently, only terminal colors are supported. Use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
+I intened to add support for Gvim/MacVim in a future version. 
+
+###Disabling
+
+The plugin is enabled by default. To disable it, set the `g:js_context_colors_enabled` variable
+to false, in your .vimrc file.
+
+
+##License
+
+MIT (see included file)

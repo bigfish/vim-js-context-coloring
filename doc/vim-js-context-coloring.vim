@@ -1,0 +1,44 @@
+Highlight JavaScript according to function scope        *JSContextColor*
+
+  * .   _______*______ .  *   .   __   .   *    __  ______  .   __   * .   .
+.      / / ___// ____/___  ____  / /____  _  __/ /_/ ____/___  / /___  _____
+  _ * / /\__ \/ /   / __ \/ __ \/ __/ _ \| |/_/ __/ /   / __ \/ / __ \/ ___/
+ / /_/ /___/ / /___/ /_/ / / / / /_/  __/>  </ /_/ /___/ /_/ / / /_/ / /  * 
+ \____//____/\____/\____/_/ /_/\__/\___/_/|_|\__/\____/\____/_/\____/_/_/ .   
+      *           .              *     .               .          *       . 
+    .      *               .               .    *   David Wilhelm <dewilhelm@gmail.com>
+
+==============================================================================
+Commands
+
+                                                        *:JSContextColor*
+:JSContextColor        	     Colorize current buffer
+
+                                                        *:JSContextColorToggle*
+:JSContextColorToggle        Toggle whether the plugin is enabled
+
+                                                        *:JSContextColorToggle*
+:JSContextColorUpdate        Update the color highlighting
+
+==============================================================================
+Options
+
+                                                *g:js_context_colors_enabled*
+
+Whether highlighting is done automatically when .js files are loaded/changed.
+>
+        let g:js_context_colors_enabled = 0
+<
+
+Note that commands above still work even when this is set to 0.
+
+                                                *g:js_context_colors*
+
+A list of colors to use for nested scope levels in JavaScript code, eg:
+
+>
+	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+<
+
+
+ vim:tw=78:sw=8:ts=8:sts=8:noet:ft=help:norl:

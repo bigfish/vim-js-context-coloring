@@ -7,34 +7,70 @@
 
 "this acts as an overlay over the existing highlighting
 
+
 let s:jscc = expand('<sfile>:p:h').'/../../bin/jscc-cli'
 
-if exists('g:funcjs_colors')
-	let s:fun_colors = g:funcjs_colors
-else
-	let s:fun_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+if !exists('g:js_context_colors')
+	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+endif
+
+if !exists('g:js_context_colors_enabled')
+	let g:js_context_colors_enabled = 1
 endif
 
 "define highlight groups dynamically
-let c = 0
-for colr in s:fun_colors
+function! JSCC_DefineHighlightGroups()
+	let c = 0
+	for colr in g:js_context_colors
 		exe 'highlight JSCC_Level_' . c . '  ctermfg=' . colr . 'ctermbg=none cterm=none'
 		let c += 1
-endfor
+	endfor
+endfunction
 
 function! JSCC_Colorize() range
-		let colordata_result = system(s:jscc, join(getline(a:firstline, a:lastline), "\n"))
-		call clearmatches()
-		"colorize the lines based on the color data
-		let colordata = eval(colordata_result)
-		if type(colordata) == type([])
-				for data in colordata
-						call matchadd('JSCC_Level_' . data.level, '\%' . data.line . 'l\%>' . (data.from - 1) . 'c.*\%<' . data.thru . 'c' , data.level) 
-				endfor
-		else
-				echo "unexpected output from jslint"
-		endif
+	let colordata_result = system(s:jscc, join(getline(a:firstline, a:lastline), "\n"))
+	call clearmatches()
+	"colorize the lines based on the color data
+	let colordata = eval(colordata_result)
+	if type(colordata) == type([])
+		for data in colordata
+			call matchadd('JSCC_Level_' . data.level, '\%' . data.line . 'l\%>' . (data.from - 1) . 'c.*\%<' . data.thru . 'c' , data.level) 
+		endfor
+	else
+		echo "unexpected output from jslint"
+	endif
 
 endfunction
 
+function! JSCC_SetAutoCommands()
+	augroup JSContextColorAug
+		au!
+		au FileType javascript JSContextColor
+		au TextChangedI,TextChanged *.js JSContextColor
+	augroup END
+end
+
+function! JSCC_ClearAutoCommands()
+	augroup JSContextColorAug
+		au!
+	augroup END
+end
+
+function! JSCC_Toggle()
+	if g:js_context_colors_enabled
+		let g:js_context_colors_enabled = 0
+		call JSCC_ClearAutoCommands()
+	else
+		let g:js_context_colors_enabled = 1
+		call JSCC_SetAutoCommands()
+	endif
+endfunction
+
+"define user commands
 command! -range=% -nargs=0 JSContextColor <line1>,<line2>:call JSCC_Colorize()
+
+command! JSContextColorToggle call JSCC_Toggle()
+
+command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
+
+call JSCC_DefineHighlightGroups()
