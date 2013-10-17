@@ -84,9 +84,16 @@ command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
 "define highlight group and do colorizing once for buffer
 :JSContextColorUpdate
+call JSCC_Enable()
 :JSContextColor
 
-if !hasmapto('<Plug>JSContextColorToggle')
+if !hasmapto('<Plug>JSContextColor')
 	"mnemonic (h)ighlight
-	nnoremap <buffer> <localleader>h :JSContextColorToggle<CR>
+	nnoremap <buffer> <localleader>h :JSContextColor<CR>
 endif
+
+if !hasmapto('<Plug>JSContextColorToggle')
+	"mnemonic (t)oggle
+	nnoremap <buffer> <localleader>t :JSContextColorToggle<CR>
+endif
+
