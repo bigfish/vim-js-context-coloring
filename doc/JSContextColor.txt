@@ -17,7 +17,7 @@ Commands
                                                         *:JSContextColorToggle*
 :JSContextColorToggle        Toggle whether the plugin is enabled
 
-                                                        *:JSContextColorToggle*
+                                                        *:JSContextColorUpdate*
 :JSContextColorUpdate        Update the color highlighting
 
 ==============================================================================
@@ -40,5 +40,9 @@ A list of colors to use for nested scope levels in JavaScript code, eg:
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
 <
 
+==============================================================================
+Mapping
+
+By default, <localleader>h is mapped to the JSContextColorToggle command.
 
  vim:tw=78:sw=8:ts=8:sts=8:noet:ft=help:norl:
