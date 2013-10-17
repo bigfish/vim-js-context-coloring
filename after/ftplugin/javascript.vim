@@ -27,8 +27,11 @@ function! JSCC_DefineHighlightGroups()
 	endfor
 endfunction
 
-function! JSCC_Colorize() range
-	let colordata_result = system(s:jscc, join(getline(a:firstline, a:lastline), "\n"))
+function! JSCC_Colorize()
+
+	let save_cursor = getpos(".")
+
+	let colordata_result = system(s:jscc, join(getline(1, '$'), "\n"))
 	call clearmatches()
 	"colorize the lines based on the color data
 	let colordata = eval(colordata_result)
@@ -37,40 +40,53 @@ function! JSCC_Colorize() range
 			call matchadd('JSCC_Level_' . data.level, '\%' . data.line . 'l\%>' . (data.from - 1) . 'c.*\%<' . data.thru . 'c' , data.level) 
 		endfor
 	else
-		echo "unexpected output from jslint"
+		echom "unexpected output from jslint:"
+		echom colordata_result
 	endif
 
+	call setpos('.', save_cursor)
 endfunction
 
-function! JSCC_SetAutoCommands()
+function! JSCC_Enable()
 	augroup JSContextColorAug
 		au!
-		au FileType javascript JSContextColor
-		au TextChangedI,TextChanged *.js JSContextColor
+		au! TextChangedI,TextChanged *.js :JSContextColor
 	augroup END
+	:JSContextColor
+	echo 'JSContextColor enabled'
 endfunction
 
-function! JSCC_ClearAutoCommands()
+function! JSCC_Disable()
+	call clearmatches()
 	augroup JSContextColorAug
 		au!
 	augroup END
+	echo 'JSContextColor disabled'
 endfunction
 
 function! JSCC_Toggle()
 	if g:js_context_colors_enabled
 		let g:js_context_colors_enabled = 0
-		call JSCC_ClearAutoCommands()
+		call JSCC_Disable()
 	else
 		let g:js_context_colors_enabled = 1
-		call JSCC_SetAutoCommands()
+		call JSCC_Enable()
 	endif
 endfunction
 
 "define user commands
-command! -range=% -nargs=0 JSContextColor <line1>,<line2>:call JSCC_Colorize()
+"command! -range=% -nargs=0 JSContextColor <line1>,<line2>:call JSCC_Colorize()
+command! JSContextColor call JSCC_Colorize()
 
 command! JSContextColorToggle call JSCC_Toggle()
 
 command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
-call JSCC_DefineHighlightGroups()
+"define highlight group and do colorizing once for buffer
+:JSContextColorUpdate
+:JSContextColor
+
+if !hasmapto('<Plug>JSContextColorToggle')
+	"mnemonic (h)ighlight
+	nnoremap <buffer> <localleader>h :JSContextColorToggle<CR>
+endif
