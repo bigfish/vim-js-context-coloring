@@ -48,13 +48,13 @@ function! JSCC_SetAutoCommands()
 		au FileType javascript JSContextColor
 		au TextChangedI,TextChanged *.js JSContextColor
 	augroup END
-end
+endfunction
 
 function! JSCC_ClearAutoCommands()
 	augroup JSContextColorAug
 		au!
 	augroup END
-end
+endfunction
 
 function! JSCC_Toggle()
 	if g:js_context_colors_enabled
