@@ -31,6 +31,7 @@ your choice. Here is a summary of the commands available:
 
     g:js_context_colors_enabled
     g:js_context_colors
+    g:js_context_colors_usemaps
 
 ##Requirements
 
@@ -78,7 +79,13 @@ I intened to add support for Gvim/MacVim in a future version.
 The plugin is enabled by default. To disable it, set the `g:js_context_colors_enabled` variable
 to false, in your .vimrc file.
 
+###Mappings
+
+By default, <localleader>h is mapped to the JSContextColor command.
+By default, <localleader>t is mapped to the JSContextColorToggle command.
+
+These are local to the buffer. They can be disabled by setting the `g:js_context_colors_usemaps` variable to 0.
 
 ##License
 
-MIT (see included file)
+MIT

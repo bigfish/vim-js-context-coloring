@@ -18,6 +18,10 @@ if !exists('g:js_context_colors_enabled')
 	let g:js_context_colors_enabled = 1
 endif
 
+if !exists('g:js_context_colors_usemaps')
+	let g:js_context_colors_usemaps = 1
+endif
+
 "define highlight groups dynamically
 function! JSCC_DefineHighlightGroups()
 	let c = 0
@@ -87,13 +91,15 @@ command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 call JSCC_Enable()
 :JSContextColor
 
-if !hasmapto('<Plug>JSContextColor')
-	"mnemonic (h)ighlight
-	nnoremap <buffer> <localleader>h :JSContextColor<CR>
-endif
+if g:js_context_colors_usemaps 
+	if !hasmapto('<Plug>JSContextColor')
+		"mnemonic (h)ighlight
+		nnoremap <buffer> <localleader>h :JSContextColor<CR>
+	endif
 
-if !hasmapto('<Plug>JSContextColorToggle')
-	"mnemonic (t)oggle
-	nnoremap <buffer> <localleader>t :JSContextColorToggle<CR>
+	if !hasmapto('<Plug>JSContextColorToggle')
+		"mnemonic (t)oggle
+		nnoremap <buffer> <localleader>t :JSContextColorToggle<CR>
+	endif
 endif
 

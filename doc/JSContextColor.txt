@@ -40,10 +40,21 @@ A list of colors to use for nested scope levels in JavaScript code, eg:
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
 <
 
+                                                *g:js_context_colors_usemaps*
+
+Disables maps (see below) when set to 0:
+
+>
+	let g:js_context_colors_usemaps = 0
+<
+
 ==============================================================================
 Mapping
 
 By default, <localleader>h is mapped to the JSContextColor command.
 By default, <localleader>t is mapped to the JSContextColorToggle command.
+
+These can be changed by setting your own maps to the commands. This will
+remove the above mappings.
 
  vim:tw=78:sw=8:ts=8:sts=8:noet:ft=help:norl:
