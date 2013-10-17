@@ -57,7 +57,7 @@ function! JSCC_Enable()
 		au! TextChangedI,TextChanged *.js :JSContextColor
 	augroup END
 	:JSContextColor
-	echo 'JSContextColor enabled'
+	"echo 'JSContextColor enabled'
 endfunction
 
 function! JSCC_Disable()
@@ -65,7 +65,7 @@ function! JSCC_Disable()
 	augroup JSContextColorAug
 		au!
 	augroup END
-	echo 'JSContextColor disabled'
+	"echo 'JSContextColor disabled'
 endfunction
 
 function! JSCC_Toggle()
