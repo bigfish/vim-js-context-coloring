@@ -77,7 +77,7 @@ I intened to add support for Gvim/MacVim in a future version.
 ###Disabling
 
 The plugin is enabled by default. To disable it, set the `g:js_context_colors_enabled` variable
-to false, in your .vimrc file.
+to 0, in your .vimrc file.
 
 ###Mappings
 
