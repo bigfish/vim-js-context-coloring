@@ -26,7 +26,7 @@ endif
 function! JSCC_DefineHighlightGroups()
 	let c = 0
 	for colr in g:js_context_colors
-		exe 'highlight JSCC_Level_' . c . '  ctermfg=' . colr . 'ctermbg=none cterm=none'
+		exe 'highlight JSCC_Level_' . c . '  ctermfg=' . colr . ' ctermbg=NONE cterm=NONE'
 		let c += 1
 	endfor
 endfunction
