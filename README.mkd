@@ -5,9 +5,7 @@
 This is a plugin for the Vim text editor to highlight JavaScript code 
 according to its scope. This was inspired by an idea by Douglas Crockford
 in his [presentation](http://www.youtube.com/watch?v=dkZFtimgAcM) at YUIConf 2012.
-(See from around the 16 minute mark onwards.) The plugin uses a version of
-[JSLint](https://github.com/douglascrockford/JSLint/) which outputs color data based on the nesting of functions. It does not
-require that you use JSLint as your linter for JS.
+(See from around the 16 minute mark onwards.) 
 
 ##Other implementations
 See [this discussion on Google Plus](https://plus.google.com/118095276221607585885/posts/FzKnHk96m2C)
@@ -45,13 +43,17 @@ on Windows, unless inside Cygwin or something like that.
 
 ### Using Pathogen.
 
-0. install [Pathogen](https://github.com/tpope/vim-pathogen)
+0. Install [Pathogen](https://github.com/tpope/vim-pathogen)
 
 1. Clone the repo from GitHub into your 'bundle' directory:
 
     git clone git@github.com:bigfish/vim-js-context-coloring.git
 
-2. Install docs (in Vim):
+2. Run this command in the repo dir to install required node modules:
+
+    npm install
+
+3. Install docs (in Vim):
 
     :Helptags
 
@@ -88,4 +90,4 @@ These are local to the buffer. They can be disabled by setting the `g:js_context
 
 ##License
 
-MIT
+MIT -- see LICENSE file

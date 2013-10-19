@@ -31,6 +31,79 @@ function! JSCC_DefineHighlightGroups()
 	endfor
 endfunction
 
+"following functions are used for debugging
+function! Warn(msg)
+		echohl Error | echom msg
+		echohl Normal
+endfunction
+
+function! IsPos(pos)
+		if len(a:pos) != 2
+				return 0
+		endif
+		if type(a:pos[0]) != type(0) 
+				return 0
+		endif
+		if type(a:pos[0]) < 0 
+				return 0
+		endif
+		if type(a:pos[1]) != type(0) 
+				return 0
+		endif
+		if type(a:pos[1]) < 0 
+				return 0
+		endif
+
+		return 1
+endfunction
+
+function! GetPosFromOffset(offset)
+		"normalize esprima byte count for Vim (first byte is 1 in Vim)
+		let offset = a:offset + 1
+		if offset < 0
+				call Warn('offset cannot be less than 0: ' . string(offset))
+		endif
+		let line = byte2line(offset)
+		let line_start_offset = line2byte(line)
+		"first col is 1 in Vim
+		let col = (offset - line_start_offset) + 1
+		let pos = [line, col]
+		"if !IsPos(pos)
+				"Warn('invalid pos result in GetPosFromOffset()' . string(pos))
+		"endif
+		return pos
+endfunction
+
+function! HighlightRange(higroup, start, end, priority)
+	let group = a:higroup
+	let startpos = a:start
+	let endpos = a:end
+	let priority = a:priority
+	"assertions commented out for perf
+	"if !IsPos(startpos)
+			"call Warn('invalid start pos given to HighlightRange() :' . string(startpos))
+	"endif
+	"if !IsPos(endpos)
+			"call Warn('invalid start pos given to HighlightRange() :' . string(endpos))
+	"endif
+
+	"single line regions
+	if startpos[0] == endpos[0]
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+
+	elseif (startpos[0] + 1) == endpos[0]
+		"two line regions
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority) 
+		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+	else
+		"multiline regions
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority) 
+		call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority) 
+		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+	endif
+
+endfunction
+
 function! JSCC_Colorize()
 
 	let save_cursor = getpos(".")
@@ -41,10 +114,20 @@ function! JSCC_Colorize()
 	let colordata = eval(colordata_result)
 	if type(colordata) == type([])
 		for data in colordata
-			call matchadd('JSCC_Level_' . data.level, '\%' . data.line . 'l\%>' . (data.from - 1) . 'c.*\%<' . data.thru . 'c' , data.level) 
+			let level = data[0]
+			"normalize implied globals (-1)
+			"TODO: they could be highlighted differently?
+			if level == -1
+					let level = 0
+			endif
+			"get line number from offset
+			let start_pos = GetPosFromOffset(data[1])
+			let end_pos = GetPosFromOffset(data[2])
+
+			call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
 		endfor
 	else
-		echom "unexpected output from jslint:"
+		echom "unexpected output from eslevels"
 		echom colordata_result
 	endif
 
