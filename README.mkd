@@ -88,13 +88,12 @@ you want to colorize comments as well, do this:
 If you want to use a custom highlight group for comments, define the group,
 and then assign it to the `g:js_context_colors_comment_higroup`, eg:
 
-  highlight MyComment ctermfg=red
-
-  let g:js_context_colors_comment_higroup = 'MyComment'
+	highlight MyComment ctermfg=red
+	let g:js_context_colors_comment_higroup = 'MyComment'
 
 Or to use the comment syntax highlighting from your colorscheme:
 
-  let g:js_context_colors_comment_higroup = 'Comment'
+	let g:js_context_colors_comment_higroup = 'Comment'
 
 This will only take effect if the `g:js_context_colors_colorize_comments` option
 is not set to 1.
