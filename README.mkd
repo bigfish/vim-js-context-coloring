@@ -105,8 +105,8 @@ to 0, in your .vimrc file.
 
 ###Mappings
 
-By default, <localleader>h is mapped to the JSContextColor command.
-By default, <localleader>t is mapped to the JSContextColorToggle command.
+By default, <localleader>h is mapped to the `JSContextColor` command.
+By default, <localleader>t is mapped to the `JSContextColorToggle` command.
 
 These are local to the buffer. They can be disabled by setting the `g:js_context_colors_usemaps` variable to 0.
 
