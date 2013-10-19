@@ -31,6 +31,11 @@ function! JSCC_DefineHighlightGroups()
 	endfor
 endfunction
 
+"parse functions
+function! Strip(input_string)
+    return substitute(a:input_string, '^\s*\(.\{-}\)\s*$', '\1', '')
+endfunction
+
 "following functions are used for debugging
 function! Warn(msg)
 		echohl Error | echom msg
@@ -107,8 +112,13 @@ endfunction
 function! JSCC_Colorize()
 
 	let save_cursor = getpos(".")
+	let buftext = join(getline(1, '$'), "\n")
+	"noop if empty string
+	if Strip(buftext) == ''
+			return
+	endif
 
-	let colordata_result = system(s:jscc, join(getline(1, '$'), "\n"))
+	let colordata_result = system(s:jscc, buftext)
 	call clearmatches()
 	"colorize the lines based on the color data
 	let colordata = eval(colordata_result)
