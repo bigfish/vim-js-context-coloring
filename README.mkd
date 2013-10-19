@@ -76,6 +76,27 @@ can use the `JSContextColorUpdate` command.
 Currently, only terminal colors are supported. Use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
 I intened to add support for Gvim/MacVim in a future version. 
 
+###Comments
+
+By default, comments are not colorized, but set to a middle grey color. If
+you want to colorize comments as well, do this:
+
+	let g:js_context_colors_colorize_comments = 1
+
+If you want to use a custom highlight group for comments, define the group,
+and then assign it to the `g:js_context_colors_comment_higroup`, eg:
+
+  highlight MyComment ctermfg=red
+
+  let g:js_context_colors_comment_higroup = 'MyComment'
+
+Or to use the comment syntax highlighting from your colorscheme:
+
+  let g:js_context_colors_comment_higroup = 'Comment'
+
+This will only take effect if the `g:js_context_colors_colorize_comments` option
+is not set to 1.
+
 ###Disabling
 
 The plugin is enabled by default. To disable it, set the `g:js_context_colors_enabled` variable

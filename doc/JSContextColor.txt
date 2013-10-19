@@ -40,6 +40,34 @@ A list of colors to use for nested scope levels in JavaScript code, eg:
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
 <
 
+                                                *g:js_context_colors_colorize_comments*
+
+Whether to colorize comments according to the scope color -- default is false.
+If you want this behaviour, set the option to 1:
+
+>
+	let g:js_context_colors_colorize_comments = 1
+<
+
+                                                *g:js_context_colors_comment_higroup*
+
+A highlight group to use for comments (default is grey)
+
+>
+	highlight MyComment ctermfg=red
+
+	let g:js_context_colors_comment_higroup = 'MyComment'
+<
+
+Or to use the comment syntax highlighting from your colorscheme:
+
+>
+	let g:js_context_colors_comment_higroup = 'Comment'
+<
+
+This will only take effect if the `g:js_context_colors_colorize_comments` option
+is not set to 1.
+
                                                 *g:js_context_colors_usemaps*
 
 Disables maps (see below) when set to 0:

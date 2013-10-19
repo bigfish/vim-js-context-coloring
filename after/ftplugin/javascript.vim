@@ -1,4 +1,5 @@
 "plugin to add javascript scope-coloring
+"Version: 0.0.2
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
@@ -22,6 +23,18 @@ if !exists('g:js_context_colors_usemaps')
 	let g:js_context_colors_usemaps = 1
 endif
 
+if !exists('g:js_context_colors_colorize_comments')
+	let g:js_context_colors_colorize_comments = 0
+endif
+
+if exists('g:js_context_colors_comment_higroup')
+		let s:comment_higroup = g:js_context_colors_comment_higroup 
+else
+		"default Comment colour: gray
+		highlight JSCC_CommentHigroup ctermfg=243
+		let s:comment_higroup = 'JSCC_CommentHigroup'
+endif
+
 "define highlight groups dynamically
 function! JSCC_DefineHighlightGroups()
 	let c = 0
@@ -29,6 +42,7 @@ function! JSCC_DefineHighlightGroups()
 		exe 'highlight JSCC_Level_' . c . '  ctermfg=' . colr . ' ctermbg=NONE cterm=NONE'
 		let c += 1
 	endfor
+
 endfunction
 
 "parse functions
@@ -110,7 +124,16 @@ function! HighlightRange(higroup, start, end, priority)
 endfunction
 
 function! HighlightComments()
-	call matchadd('Comment', '\/\/.*', 50) 
+
+	"colorizing is the default behaviour in eslevels but not in this plugin
+	"it restores the default comment syntax highlighting
+	"unless g:js_context_colors_colorize_comments is set to 1
+
+	if exists('g:js_context_colors_colorize_comments') && g:js_context_colors_colorize_comments
+			return
+	endif
+
+	call matchadd(s:comment_higroup, '\/\/.*', 50) 
 
 	"block comments
 	call cursor(1,1)
@@ -130,7 +153,7 @@ function! HighlightComments()
 				"echom 'ends at ' . endbc[1]
 				call cursor(endbc[0], endbc[1])
 
-				call HighlightRange('Comment', startbc, endbc, 50)
+				call HighlightRange(s:comment_higroup, startbc, endbc, 50)
 		endif
 
 	endwhile
@@ -164,6 +187,7 @@ function! JSCC_Colorize()
 
 			call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
 		endfor
+
 		call HighlightComments()
 	else
 		echom "unexpected output from eslevels"
