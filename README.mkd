@@ -30,6 +30,8 @@ your choice. Here is a summary of the commands available:
     g:js_context_colors_enabled
     g:js_context_colors
     g:js_context_colors_usemaps
+    g:js_context_colors_colorize_comments
+    g:js_context_colors_comment_higroup
 
 ##Requirements
 
