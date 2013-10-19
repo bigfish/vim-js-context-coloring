@@ -109,6 +109,34 @@ function! HighlightRange(higroup, start, end, priority)
 
 endfunction
 
+function! HighlightComments()
+	call matchadd('Comment', '\/\/.*', 50) 
+
+	"block comments
+	call cursor(1,1)
+
+	while search('\/\*', 'cW') != 0
+
+		let startbc_pos = getpos('.')
+		let startbc = [startbc_pos[1], startbc_pos[2]]
+
+		"echom 'found block comment at ' . startbc[0] . ',' . startbc[1]
+
+		if search('\*\/', 'cWe')
+
+				let endbc_pos = getpos('.')
+				let endbc = [endbc_pos[1], endbc_pos[2]]
+
+				"echom 'ends at ' . endbc[1]
+				call cursor(endbc[0], endbc[1])
+
+				call HighlightRange('Comment', startbc, endbc, 50)
+		endif
+
+	endwhile
+
+endfunction
+
 function! JSCC_Colorize()
 
 	let save_cursor = getpos(".")
@@ -136,10 +164,12 @@ function! JSCC_Colorize()
 
 			call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
 		endfor
+		call HighlightComments()
 	else
 		echom "unexpected output from eslevels"
 		echom colordata_result
 	endif
+
 
 	call setpos('.', save_cursor)
 endfunction
