@@ -1,13 +1,10 @@
 "plugin to add javascript scope-coloring
-"Version: 0.0.2
+"Version: 0.0.3
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
 "only supports terminal colors at this time	
 "use XtermColorTable plugin to see what colors are available
-
-"this acts as an overlay over the existing highlighting
-
 
 let s:jscc = expand('<sfile>:p:h').'/../../bin/jscc-cli'
 
