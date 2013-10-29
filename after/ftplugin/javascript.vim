@@ -162,38 +162,66 @@ endfunction
 
 function! JSCC_Colorize()
 
+	call clearmatches()
+
 	let save_cursor = getpos(".")
-	let buftext = join(getline(1, '$'), "\n")
+
+	let buflines = getline(1, '$')
+
+	"replace hashbangs (in node CLI scripts)
+	let linenum  = 0
+	for bline in buflines
+		if match(bline, '#!') == 0
+			"replace #! with // to prevent parse errors
+			"while not throwing off byte count
+			let buflines[linenum] = '//' . strpart(bline, 2)
+			break
+		endif
+		let linenum += 1
+	endfor
+
+	let buftext = join(buflines, "\n")
 	"noop if empty string
 	if Strip(buftext) == ''
 			return
 	endif
 
-	let colordata_result = system(s:jscc, buftext)
-	call clearmatches()
-	"colorize the lines based on the color data
-	let colordata = eval(colordata_result)
-	if type(colordata) == type([])
-		for data in colordata
-			let level = data[0]
-			"normalize implied globals (-1)
-			"TODO: they could be highlighted differently?
-			if level == -1
+
+	"ignore errors from shell command to prevent distracting user
+	"syntax errors should be caught by a lint program
+	"however a message is logged to 'messages' list
+	"use the :messages command to view them
+	try
+		let colordata_result = system(s:jscc, buftext)
+		"colorize the lines based on the color data
+		let colordata = eval(colordata_result)
+		if type(colordata) == type([])
+			"initially highlight all text as global
+			"as eslevels does not seem to provide highlight data
+			"for starting and end regions
+			call insert(colordata, [0, 0, len(buftext)])
+			"highlight all regions provided by eslevels
+			for data in colordata
+				let level = data[0]
+				"normalize implied globals (-1)
+				"TODO: they could be highlighted differently?
+				if level == -1
 					let level = 0
-			endif
-			"get line number from offset
-			let start_pos = GetPosFromOffset(data[1])
-			let end_pos = GetPosFromOffset(data[2])
+				endif
+				"get line number from offset
+				let start_pos = GetPosFromOffset(data[1])
+				let end_pos = GetPosFromOffset(data[2])
 
-			call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
-		endfor
+				call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
+			endfor
 
-		call HighlightComments()
-	else
-		echom "unexpected output from eslevels"
-		echom colordata_result
-	endif
-
+			call HighlightComments()
+		else
+			echom "unexpected output from eslevels:" . string(colordata_result)
+		endif
+	catch
+		echom "JSContextColors: Error occurred during parsing. Check your syntax."
+	endtry
 
 	call setpos('.', save_cursor)
 endfunction
