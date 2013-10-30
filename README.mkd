@@ -59,6 +59,23 @@ on Windows, unless inside Cygwin or something like that.
 
     :Helptags
 
+### Using NeoBundle.
+
+0. Install [NeoBundle](https://github.com/Shougo/neobundle.vim#quick-start)
+
+1. Add the following to your `vimrc`:
+
+```VimL
+NeoBundle 'bigfish/vim-js-context-coloring', {
+  \ 'build' : {
+  \     'mac' : 'npm install --update',
+  \     'unix' : 'npm install --update',
+  \    },
+  \ }
+```
+
+2. Close & re-open Vim.
+
 ##Configuration
 
 By default the plugin is enabled for all .js files. The highlighting will be applied
