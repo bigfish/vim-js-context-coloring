@@ -35,9 +35,11 @@ your choice. Here is a summary of the commands available:
 
 ##Requirements
 
-The plugin relies on [NodeJS](http://nodejs.org/) being installed, preferably > 0.10.
+1. This plugin requires Vim version 7.4  (or greater).
 
-The command line script which runs jslint in Node to obtain the coloring data 
+2. The plugin relies on [NodeJS](http://nodejs.org/) being installed, preferably > 0.10.
+
+3. UNIX-like environment. The command line script which runs jslint in Node to obtain the coloring data 
 requires a Unix-like environment to work. This means it's probably not going to work
 on Windows, unless inside Cygwin or something like that. 
 

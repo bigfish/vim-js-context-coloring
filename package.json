@@ -1,17 +1,8 @@
 {
   "name": "vim-js-context-coloring",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Javascript scope highlighting",
   "main": "after/ftplugin/javascript.vim",
-  "bin": {
-    "vim-js-context-coloring": "jslint.js"
-  },
-  "directories": {
-    "doc": "doc"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/bigfish/vim-js-context-coloring.git"
@@ -26,6 +17,6 @@
   "gitHead": "617951e1806cf83d3f324687e0a2a0bb28eca47b",
   "dependencies": {
     "esprima": "~1.0.4",
-    "eslevels": "~0.3.0"
+    "eslevels": "~0.3.1"
   }
 }
