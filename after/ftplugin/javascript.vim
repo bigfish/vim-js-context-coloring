@@ -32,6 +32,8 @@ else
 		let s:comment_higroup = 'JSCC_CommentHigroup'
 endif
 
+let s:my_changedtick = b:changedtick
+
 "define highlight groups dynamically
 function! JSCC_DefineHighlightGroups()
 	let c = 0
@@ -223,13 +225,36 @@ function! JSCC_Colorize()
 	call setpos('.', save_cursor)
 endfunction
 
+function! JSCC_UpdateOnChange()
+	if s:my_changedtick != b:changedtick
+		let s:my_changedtick = b:changedtick
+		call JSCC_Colorize()
+	endif
+endfunction
+
 function! JSCC_Enable()
-	augroup JSContextColorAug
-		au!
-		au! TextChangedI,TextChanged *.js :JSContextColor
-	augroup END
+	"if < vim 7.4 TextChanged,TextChangedI events are not
+	"available and will result in error E216
+	try
+
+		augroup JSContextColorAug
+			au!
+			au! TextChangedI,TextChanged <buffer> :JSContextColor
+		augroup END
+
+	catch /^Vim\%((\a\+)\)\=:E216/
+
+		"use different events to trigger update in Vim < 7.4
+		augroup JSContextColorAug
+			au!
+			au! InsertLeave <buffer> :JSContextColor
+			au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+		augroup END
+
+	endtry
+
 	:JSContextColor
-	"echo 'JSContextColor enabled'
+
 endfunction
 
 function! JSCC_Disable()
