@@ -6,7 +6,7 @@
 "only supports terminal colors at this time	
 "use XtermColorTable plugin to see what colors are available
 
-let s:jscc = expand('<sfile>:p:h').'/../../bin/jscc-cli'
+let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 if !exists('g:js_context_colors')
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
@@ -219,7 +219,7 @@ function! JSCC_Colorize()
 			echom "unexpected output from eslevels:" . string(colordata_result)
 		endif
 	catch
-		echom "JSContextColors: Error occurred during parsing. Check your syntax."
+		echom "JSContextColors: Error occurred during parsing."
 	endtry
 
 	call setpos('.', save_cursor)
