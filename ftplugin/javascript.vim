@@ -284,9 +284,11 @@ command! JSContextColorToggle call JSCC_Toggle()
 command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
 "define highlight group and do colorizing once for buffer
+if g:js_context_colors_enabled
 :JSContextColorUpdate
 call JSCC_Enable()
 :JSContextColor
+endif
 
 if g:js_context_colors_usemaps 
 	if !hasmapto('<Plug>JSContextColor')
