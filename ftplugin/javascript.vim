@@ -3,13 +3,22 @@
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
-"only supports terminal colors at this time	
+"only supports terminal colors at this time
 "use XtermColorTable plugin to see what colors are available
 
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 if !exists('g:js_context_colors')
-	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
+	"using colors suggested by Douglas Crockford
+        "1) white: 15
+        "2) green: 2
+        "3) yellow: 3
+        "4) blue: 4
+        "5) red: 1
+        "6) cyan: 6
+        "7) grey: 7
+	let g:js_context_colors = [ 15, 2, 3, 4, 1, 6, 7 ]
+
 endif
 
 if !exists('g:js_context_colors_enabled')
@@ -25,11 +34,15 @@ if !exists('g:js_context_colors_colorize_comments')
 endif
 
 if exists('g:js_context_colors_comment_higroup')
-		let s:comment_higroup = g:js_context_colors_comment_higroup 
+        let s:comment_higroup = g:js_context_colors_comment_higroup
 else
-		"default Comment colour: gray
-		highlight JSCC_CommentHigroup ctermfg=243
-		let s:comment_higroup = 'JSCC_CommentHigroup'
+        "default Comment colour: gray
+        highlight JSCC_CommentHigroup ctermfg=243
+        let s:comment_higroup = 'JSCC_CommentHigroup'
+endif
+
+if !exists('g:js_context_colors_debug')
+        let g:js_context_colors_debug = 0
 endif
 
 let s:my_changedtick = b:changedtick
@@ -59,16 +72,16 @@ function! IsPos(pos)
 		if len(a:pos) != 2
 				return 0
 		endif
-		if type(a:pos[0]) != type(0) 
+		if type(a:pos[0]) != type(0)
 				return 0
 		endif
-		if type(a:pos[0]) < 0 
+		if type(a:pos[0]) < 0
 				return 0
 		endif
-		if type(a:pos[1]) != type(0) 
+		if type(a:pos[1]) != type(0)
 				return 0
 		endif
-		if type(a:pos[1]) < 0 
+		if type(a:pos[1]) < 0
 				return 0
 		endif
 
@@ -97,6 +110,10 @@ function! HighlightRange(higroup, start, end, priority)
 	let startpos = a:start
 	let endpos = a:end
 	let priority = a:priority
+
+        if g:js_context_colors_debug
+                echom "HighlightRange(" . group . "," . string(startpos) . "," . string(endpos) . "," . priority . ")"
+        endif
 	"assertions commented out for perf
 	"if !IsPos(startpos)
 			"call Warn('invalid start pos given to HighlightRange() :' . string(startpos))
@@ -107,17 +124,17 @@ function! HighlightRange(higroup, start, end, priority)
 
 	"single line regions
 	if startpos[0] == endpos[0]
-		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority)
 
 	elseif (startpos[0] + 1) == endpos[0]
 		"two line regions
-		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority) 
-		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
+		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
 	else
 		"multiline regions
-		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority) 
-		call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority) 
-		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority) 
+		call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
+		call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority)
+		call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
 	endif
 
 endfunction
@@ -132,7 +149,7 @@ function! HighlightComments()
 			return
 	endif
 
-	call matchadd(s:comment_higroup, '\/\/.*', 50) 
+	call matchadd(s:comment_higroup, '\/\/.*', 50)
 
 	"block comments
 	call cursor(1,1)
@@ -185,11 +202,8 @@ function! JSCC_Colorize()
 			return
 	endif
 
-
 	"ignore errors from shell command to prevent distracting user
 	"syntax errors should be caught by a lint program
-	"however a message is logged to 'messages' list
-	"use the :messages command to view them
 	try
 		let colordata_result = system(s:jscc, buftext)
 		"colorize the lines based on the color data
@@ -200,6 +214,7 @@ function! JSCC_Colorize()
 			"for starting and end regions
 			call insert(colordata, [0, 0, len(buftext)])
 			"highlight all regions provided by eslevels
+
 			for data in colordata
 				let level = data[0]
 				"normalize implied globals (-1)
@@ -211,16 +226,19 @@ function! JSCC_Colorize()
 				let start_pos = GetPosFromOffset(data[1])
 				let end_pos = GetPosFromOffset(data[2])
 
-				call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level) 
+				call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level)
 			endfor
 
 			call HighlightComments()
-		else
-			echom "unexpected output from eslevels:" . string(colordata_result)
 		endif
-	catch
-		echom "JSContextColors: Error occurred during parsing."
-	endtry
+
+        catch
+                echom "JSContextColors Error. Enable debug mode for details."
+
+                if g:js_context_colors_debug
+                        echom colordata_result
+                endif
+        endtry
 
 	call setpos('.', save_cursor)
 endfunction
@@ -283,14 +301,17 @@ command! JSContextColorToggle call JSCC_Toggle()
 
 command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
+"always create color highlight groups in case of direct calls to :JSContextColor
+:JSContextColorUpdate
+
 "define highlight group and do colorizing once for buffer
 if g:js_context_colors_enabled
-:JSContextColorUpdate
-call JSCC_Enable()
-:JSContextColor
+        call JSCC_Enable()
+        :JSContextColor
 endif
 
-if g:js_context_colors_usemaps 
+
+if g:js_context_colors_usemaps
 	if !hasmapto('<Plug>JSContextColor')
 		"mnemonic (h)ighlight
 		nnoremap <buffer> <silent> <localleader>h :JSContextColor<CR>
