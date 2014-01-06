@@ -60,7 +60,10 @@ See the XtermColorTable plugin to see the 256 color range.
 The default colors are 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey. You may add 
 additional levels if you wish. 
 
-<
+                                                *g:js_context_colors_debug*
+
+If set to 1, this enables debug output. 
+
 
                                                 *g:js_context_colors_colorize_comments*
 

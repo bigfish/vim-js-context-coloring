@@ -32,6 +32,7 @@ your choice. Here is a summary of the commands available:
     g:js_context_colors_usemaps
     g:js_context_colors_colorize_comments
     g:js_context_colors_comment_higroup
+    g:js_context_colors_debug
 
 ##Requirements
 
@@ -91,11 +92,48 @@ To change the colors used, set the `g:js_context_colors` variable to a list of c
 
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
 
+The first color is the first level (global), the second is level 2 (top level
+functions), the third is functions inside top-level functions...etc. The only 
+values currently supported are terminal color numbers.
+
+NB: Ensure that your terminal supports 256 colors before using colors
+outside the default 16 terminal colors (0 - 15). Eg. these are the defaults
+on Ubuntu (Xterm):
+
+0:black, 1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan, 7:light gray
+
+The colors 8-15 are 'bold' versions of the above:
+
+8:dark gray, 9:bright red, 10:bright green, 11: bright yellow, 12: bright blue,
+13: bright magenta, 14:bright cyan, 15:white
+
+See the XtermColorTable plugin to see the 256 color range.
+
+The default colors are 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey. You may add 
+additional levels if you wish. 
 Note that the color changes will not take effect immediately. To update the colors, you
-can use the `JSContextColorUpdate` command.
+can use the `:JSContextColorUpdate` command.
 
 Currently, only terminal colors are supported. Use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
 I intened to add support for Gvim/MacVim in a future version. 
+
+###256 Color Support
+
+####Linux
+
+Ubuntu (and I suspect most modern distros?) do support 256 colors by default, but Vim does not know this
+as the $TERM environment is set to 'xterm' by default and Vim does not think that the terminal can support 
+256 colors and does not even try. This can be remedied by adding the following line to your .bashrc:
+
+ [ -z "$TMUX" ] && export TERM=xterm-256color
+
+This means that unless we are using tmux (which sets its own $TERM value and should allow the plugin to work).
+
+####Mac OS X
+
+Terminal.app does not support 256 colors in Snow Leopard and older. If you have Snow Leopard you can use iTerm2
+ to enable 256 color support. If you have a newer OSX you should be OK but the $TERM variable must still be 
+ set to 'xterm-256color'. Apparently this is default in Lion, and more recent versions, so that it should just work.
 
 ###Comments
 
