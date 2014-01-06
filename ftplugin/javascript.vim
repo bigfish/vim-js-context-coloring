@@ -1,5 +1,5 @@
 "plugin to add javascript scope-coloring
-"Version: 0.0.4
+"Version: 0.0.5
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
