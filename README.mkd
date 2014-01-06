@@ -97,7 +97,7 @@ functions), the third is functions inside top-level functions...etc. The only
 values currently supported are terminal color numbers.
 
 NB: Ensure that your terminal supports 256 colors before using colors
-outside the default 16 terminal colors (0 - 15). Eg. these are the defaults
+outside the default 16 terminal colors (0 - 15). Eg. these are the basic terminal colors
 on Ubuntu (Xterm):
 
 0:black, 1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan, 7:light gray
@@ -107,15 +107,14 @@ The colors 8-15 are 'bold' versions of the above:
 8:dark gray, 9:bright red, 10:bright green, 11: bright yellow, 12: bright blue,
 13: bright magenta, 14:bright cyan, 15:white
 
-See the XtermColorTable plugin to see the 256 color range.
-
 The default colors are 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey. You may add 
 additional levels if you wish. 
-Note that the color changes will not take effect immediately. To update the colors, you
-can use the `:JSContextColorUpdate` command.
 
 Currently, only terminal colors are supported. Use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
-I intened to add support for Gvim/MacVim in a future version. 
+I intend to add support for Gvim/MacVim in a future version. 
+
+Note that the color changes will not take effect immediately. To update the colors, you
+can use the `:JSContextColorUpdate` command.
 
 ###256 Color Support
 
