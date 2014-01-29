@@ -30,7 +30,7 @@ if !exists('g:js_context_colors_usemaps')
 endif
 
 if !exists('g:js_context_colors_colorize_comments')
-	let g:js_context_colors_colorize_comments = 0
+	let g:js_context_colors_colorize_comments = 1
 endif
 
 if exists('g:js_context_colors_comment_higroup')
@@ -141,11 +141,19 @@ endfunction
 
 function! HighlightComments()
 
-	"colorizing is the default behaviour in eslevels but not in this plugin
-	"it restores the default comment syntax highlighting
+	"highlight comments according to comment higroup, not function scope
 	"unless g:js_context_colors_colorize_comments is set to 1
+        "NOTE: this currently is buggy as comments inside strings
+        "can cause broken coloring.. TODO: a better solution would be
+        "to use keep Vim syntax highlighting for comments
+        "but the priority of syntax highlighting is lower
+        "than the matchadd() function used to mark scopes
+        "furthermore, re-highlighting comments is slowing down
+        "highlighting. Thus this functionality is deprecated
+        "and may be removed in future unless a better solution
+        "is found
 
-	if exists('g:js_context_colors_colorize_comments') && g:js_context_colors_colorize_comments
+	if g:js_context_colors_colorize_comments
 			return
 	endif
 
@@ -153,7 +161,7 @@ function! HighlightComments()
 
 	"block comments
 	call cursor(1,1)
-
+        "problem: this will also highlight comments inside strings!
 	while search('\/\*', 'cW') != 0
 
 		let startbc_pos = getpos('.')
