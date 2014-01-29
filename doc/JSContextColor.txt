@@ -40,9 +40,23 @@ A list of custom colors to use for nested scope levels in JavaScript code, eg:
 >
 	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
 
+Colors may be numbers (for terminal colors) or strings which define hexadecimal colors (for the GUI) 
+defined as '#rrggbb' where rr, gg, bb are the red, green, and blue values in hexadecimal. The plugin
+will translate terminal colors to hex when the gui is found to be running. You may also use color names
+such as: 'Red', 'Green', 'Cyan', 'Magenta', 'Blue' and others, see `:h ctermfg' for more. The GUI may
+support additional color names, eg. 'Violet', which will work in GUI but not in the terminal. Both hex
+colors and color names are case-insensitive. You may combine color numbers and names in the same list.
+
+You may also specify a color as a dictionary with the following keys: ctermfg, ctermbg, guifg, guibg. These
+take the same values as described above, except that hex colors may not be given for cterm options, and
+terminal color numbers may *not* be given for the gui options. You do not have to specify all the options,
+if not specified they will be set to the default values. So if you wanted to, you could specify a background
+of green for the second scope as follows:
+
+	let g:js_context_colors = [ 252, { 'ctermbg': 'green', 'guibg': 'green'}, 11, 172, 1, 161, 63 ]
+
 The first color is the first level (global), the second is level 2 (top level
-functions), the third is functions inside top-level functions...etc. The only 
-values currently supported are terminal color numbers.
+functions), the third is functions inside top-level functions...etc. 
 
 NB: Ensure that your terminal supports 256 colors before using colors
 outside the default 16 terminal colors (0 - 15). Eg. these are the defaults
@@ -67,11 +81,18 @@ If set to 1, this enables debug output.
 
                                                 *g:js_context_colors_colorize_comments*
 
-Whether to colorize comments according to the scope color -- default is false.
-If you want this behaviour, set the option to 1:
+Whether to colorize comments according to the scope color -- default is true.
+If you want this disable behaviour, set the option to 0:
 
 >
-	let g:js_context_colors_colorize_comments = 1
+	let g:js_context_colors_colorize_comments = 0
+
+This will attempt to re-highlight comments as the comment higroup (see next
+section). However it is a bit buggy -- if comments contain start comment
+tokens (// or /*) it will get confused and also slow down rendering. Therefore
+it is not recommended to disable this option, and it may be removed in the
+future.
+
 <
 
                                                 *g:js_context_colors_comment_higroup*
