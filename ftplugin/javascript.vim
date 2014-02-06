@@ -46,6 +46,9 @@ endif
 
 let s:my_changedtick = b:changedtick
 
+"offset highlight priority negatively so that it does not clobber hlsearch (priority 0)
+let s:priority_offset = -100
+
 "xterm -- hex RGB colors taken from XTerm Color Table (highly recommended!)
 let s:xterm_colors = {
             \ '0':   '#000000', '1':   '#800000', '2':   '#008000', '3':   '#808000', '4':   '#000080',
@@ -254,10 +257,10 @@ function! HighlightRange(higroup, start, end, priority)
     let group = a:higroup
     let startpos = a:start
     let endpos = a:end
-    let priority = a:priority
+    let priority = s:priority_offset + a:priority
 
     if g:js_context_colors_debug
-        echom "HighlightRange(" . group . "," . string(startpos) . "," . string(endpos) . "," . priority . ")"
+        echom "HighlightRange(" . group . "," . string(startpos) . "," . string(endpos) . "," . string(priority) . ")"
     endif
     "assertions commented out for perf
     "if !IsPos(startpos)
@@ -302,7 +305,7 @@ function! HighlightComments()
         return
     endif
 
-    call matchadd(s:comment_higroup, '\/\/.*', 50)
+    call matchadd(s:comment_higroup, '\/\/.*', s:priority_offset + 50)
 
     "block comments
     call cursor(1,1)
@@ -322,7 +325,7 @@ function! HighlightComments()
             "echom 'ends at ' . endbc[1]
             call cursor(endbc[0], endbc[1])
 
-            call HighlightRange(s:comment_higroup, startbc, endbc, 50)
+            call HighlightRange(s:comment_higroup, startbc, endbc, s:priority_offset + 50)
         endif
 
     endwhile
