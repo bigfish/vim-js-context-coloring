@@ -15,9 +15,19 @@ process.stdin.on('data', function(chunk) {
 process.stdin.on('end', function() {
     var syntax = esprima.parse(input_js, {
                 range: true,
+                comment: true,
                 tolerant: true
 			}),
-        levels = eslevels.levels(syntax, {mode:'full'});
+        levels = eslevels.levels(syntax, {mode:'full'}),
+        comments = [];
 
-    process.stdout.write(JSON.stringify(levels));
+        //normalize comments range data to be same as levels data
+        syntax.comments.forEach(function (comment) {
+                comments.push(comment.range);
+        });
+
+        process.stdout.write(JSON.stringify({
+                levels: levels,
+                comments: comments
+        }));
 });

@@ -259,17 +259,6 @@ function! HighlightRange(higroup, start, end, priority)
     let endpos = a:end
     let priority = s:priority_offset + a:priority
 
-    if g:js_context_colors_debug
-        echom "HighlightRange(" . group . "," . string(startpos) . "," . string(endpos) . "," . string(priority) . ")"
-    endif
-    "assertions commented out for perf
-    "if !IsPos(startpos)
-    "call Warn('invalid start pos given to HighlightRange() :' . string(startpos))
-    "endif
-    "if !IsPos(endpos)
-    "call Warn('invalid start pos given to HighlightRange() :' . string(endpos))
-    "endif
-
     "single line regions
     if startpos[0] == endpos[0]
         call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority)
@@ -287,48 +276,48 @@ function! HighlightRange(higroup, start, end, priority)
 
 endfunction
 
-function! HighlightComments()
-
-    "highlight comments according to comment higroup, not function scope
-    "unless g:js_context_colors_colorize_comments is set to 1
-    "NOTE: this currently is buggy as comments inside strings
-    "can cause broken coloring.. TODO: a better solution would be
-    "to use keep Vim syntax highlighting for comments
-    "but the priority of syntax highlighting is lower
-    "than the matchadd() function used to mark scopes
-    "furthermore, re-highlighting comments is slowing down
-    "highlighting. Thus this functionality is deprecated
-    "and may be removed in future unless a better solution
-    "is found
-
-    if g:js_context_colors_colorize_comments
-        return
+function! s:HighlightRangeList(ranges, ...)
+    "capture optional arguments (defaultLevel,hiGroup) 
+    "set defaults
+    let defaultLevel = 0
+    let hiGroup = ""
+    "a:0 is the number of optional arguments
+    if a:0
+            let defaultLevel = a:1
+    endif
+    if a:0 == 2
+            let hiGroup = a:2
     endif
 
-    call matchadd(s:comment_higroup, '\/\/.*', s:priority_offset + 50)
+    for data in a:ranges
 
-    "block comments
-    call cursor(1,1)
-    "problem: this will also highlight comments inside strings!
-    while search('\/\*', 'cW') != 0
-
-        let startbc_pos = getpos('.')
-        let startbc = [startbc_pos[1], startbc_pos[2]]
-
-        "echom 'found block comment at ' . startbc[0] . ',' . startbc[1]
-
-        if search('\*\/', 'cWe')
-
-            let endbc_pos = getpos('.')
-            let endbc = [endbc_pos[1], endbc_pos[2]]
-
-            "echom 'ends at ' . endbc[1]
-            call cursor(endbc[0], endbc[1])
-
-            call HighlightRange(s:comment_higroup, startbc, endbc, s:priority_offset + 50)
+        "if we have 3 elements, use first as level
+        if len(data) == 3
+            let level = data[0]
+        else
+            let level = defaultLevel
         endif
 
-    endwhile
+        "normalize implied globals (-1)
+        "TODO: they could be highlighted differently?
+        if level == -1
+            let level = 0
+        endif
+
+        "use hiGroup if given or else use level
+        if hiGroup != ""
+            let higroup_name = hiGroup
+        else
+            let higroup_name = 'JSCC_Level_' . level
+        endif
+
+        "get line number from offset
+        "use offset from end to normalize 3 element and 2 element ranges
+        let start_pos = GetPosFromOffset(data[-2])
+        let end_pos = GetPosFromOffset(data[-1])
+
+        call HighlightRange(higroup_name, start_pos, end_pos, level)
+    endfor
 
 endfunction
 
@@ -362,30 +351,23 @@ function! JSCC_Colorize()
     "syntax errors should be caught by a lint program
     try
         let colordata_result = system(s:jscc, buftext)
-        "colorize the lines based on the color data
+
         let colordata = eval(colordata_result)
-        if type(colordata) == type([])
-            "initially highlight all text as global
-            "as eslevels does not seem to provide highlight data
-            "for starting and end regions
-            call insert(colordata, [0, 0, len(buftext)])
-            "highlight all regions provided by eslevels
 
-            for data in colordata
-                let level = data[0]
-                "normalize implied globals (-1)
-                "TODO: they could be highlighted differently?
-                if level == -1
-                    let level = 0
-                endif
-                "get line number from offset
-                let start_pos = GetPosFromOffset(data[1])
-                let end_pos = GetPosFromOffset(data[2])
+        let levels = colordata.levels
 
-                call HighlightRange('JSCC_Level_' . level, start_pos, end_pos, level)
-            endfor
+        "initially highlight all text as global
+        "as eslevels does not seem to provide highlight data
+        "for starting and end regions
+        call insert(levels, [0, 0, len(buftext)])
 
-            call HighlightComments()
+        call s:HighlightRangeList(levels)
+
+        if !g:js_context_colors_colorize_comments
+            let comments = colordata.comments
+            "override level to be 50 -- above all levels but < 100
+            "and override higroup to be comment higroup
+            call s:HighlightRangeList(comments, 50, s:comment_higroup)
         endif
 
     catch
