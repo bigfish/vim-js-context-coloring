@@ -81,17 +81,14 @@ If set to 1, this enables debug output.
 
                                                 *g:js_context_colors_colorize_comments*
 
-Whether to colorize comments according to the scope color -- default is true.
-If you want this disable behaviour, set the option to 0:
+Whether to colorize comments according to the scope color -- default is false.
+
+If you want this enable this behaviour, set the option to 1:
 
 >
-	let g:js_context_colors_colorize_comments = 0
+	let g:js_context_colors_colorize_comments = 1
 
-This will attempt to re-highlight comments as the comment higroup (see next
-section). However it is a bit buggy -- if comments contain start comment
-tokens (// or /*) it will get confused and also slow down rendering. Therefore
-it is not recommended to disable this option, and it may be removed in the
-future.
+This will highlight comments as the comment higroup (see next section). 
 
 <
 

@@ -29,7 +29,7 @@ if !exists('g:js_context_colors_usemaps')
 endif
 
 if !exists('g:js_context_colors_colorize_comments')
-    let g:js_context_colors_colorize_comments = 1
+    let g:js_context_colors_colorize_comments = 0
 endif
 
 if exists('g:js_context_colors_comment_higroup')
