@@ -322,7 +322,6 @@ function! s:HighlightRangeList(ranges, ...)
 endfunction
 
 function! JSCC_Colorize()
-
     call clearmatches()
 
     let save_cursor = getpos(".")
@@ -418,7 +417,6 @@ function! JSCC_Disable()
     augroup JSContextColorAug
         au!
     augroup END
-    "echo 'JSContextColor disabled'
 endfunction
 
 function! JSCC_Toggle()
@@ -445,7 +443,6 @@ command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 "define highlight group and do colorizing once for buffer
 if g:js_context_colors_enabled
     call JSCC_Enable()
-    :JSContextColor
 endif
 
 
