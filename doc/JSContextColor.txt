@@ -31,7 +31,7 @@ Whether highlighting is done automatically when .js files are loaded/changed.
 <
 
 Note that commands above still work even when this is set to 0. If you enable
-the *g:js_context_colors_usemaps* option below, you can trigger them more easily.
+the `g:js_context_colors_usemaps` option below, you can trigger them more easily.
 
                                                 *g:js_context_colors*
 
