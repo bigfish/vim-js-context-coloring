@@ -174,10 +174,10 @@ function! JSCC_GetColorDef(c)
 
     "finally, it is possible the color is a GUI color name (only)
     "and so if we are in gui, we try this value for guifg only
-    if has("gui_running")
-        let colorDef.guifg = col
-        return colorDef
-    endif
+    " if has("gui_running")
+    let colorDef.guifg = col
+    return colorDef
+    " endif
 
     if g:js_context_colors_debug
         call Warn("Warning!: unsupported color: " . col . ' [JavaScript Context Color]')
