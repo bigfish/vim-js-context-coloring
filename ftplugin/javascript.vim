@@ -458,3 +458,13 @@ if g:js_context_colors_usemaps
     endif
 endif
 
+"prevent contamination of split windows
+"http://vim.wikia.com/wiki/Detect_window_creation_with_WinEnter
+augroup JSContexColorNoContaminate
+
+    au!
+    autocmd WinEnter * let w:jscc_created=1
+
+    autocmd WinEnter * if !exists('w:jscc_created') | :call clearmatches()
+
+augroup END
