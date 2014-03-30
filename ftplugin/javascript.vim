@@ -44,6 +44,14 @@ else
     let s:comment_higroup = 'JSCC_CommentHigroup'
 endif
 
+if !exists('g:js_context_colors_show_error_message')
+    let g:js_context_colors_show_error_message = 0
+endif
+
+if !exists('g:js_context_colors_no_highlight_on_syntax_error')
+    let g:js_context_colors_no_highlight_on_syntax_error = 1
+endif
+
 if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
@@ -326,7 +334,10 @@ function! s:HighlightRangeList(ranges, ...)
 endfunction
 
 function! JSCC_Colorize()
-    call clearmatches()
+
+    if g:js_context_colors_no_highlight_on_syntax_error
+        call clearmatches()
+    endif
 
     let save_cursor = getpos(".")
 
@@ -364,6 +375,12 @@ function! JSCC_Colorize()
         "for starting and end regions
         call insert(levels, [0, 0, len(buftext)])
 
+        "at this point if we've not thrown an error
+        "the syntax was probably valid so lets clear old highlighting
+        if !g:js_context_colors_no_highlight_on_syntax_error
+            call clearmatches()
+        end
+
         call s:HighlightRangeList(levels)
 
         if !g:js_context_colors_colorize_comments
@@ -374,7 +391,10 @@ function! JSCC_Colorize()
         endif
 
     catch
-        echom "JSContextColors Error. Enable debug mode for details."
+
+        if g:js_context_colors_show_error_message || g:js_context_colors_debug
+            echom "Syntax Error [JSContextColors]"
+        endif
 
         if g:js_context_colors_debug
             echom colordata_result

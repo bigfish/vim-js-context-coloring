@@ -186,6 +186,29 @@ the jus set the option to false:
 
 Then it will behave as previous versions of the plugin.
 
+###Invalid Syntax Behaviour
+
+When the syntax is invalid, the plugin cannot provide highlighting.
+This can be used to detect syntax errors! However, if you want to
+ignore these failures, and just preserve the last highlighting,
+you can set this option to 0:
+
+	let g:js_context_colors_no_highlight_on_syntax_error = 0
+
+It will keep the last successful highlighting in place. However it will
+not be accurate if code is being changed, until it is successfully parsed again,
+so you may see incorrect highlighting temporarily.
+
+###Error Message
+When the plugin fails to get a valid response from the parser script, it
+will show an error... it will also not highlight. This is most likely a syntax error,
+but it could also be a problem with the CLI script (perhaps it was not installed).
+To stop annoying users, however it is now suppressed by default.
+
+But it can be re-enabled with this option:
+
+	let g:js_context_colors_show_error_message = 1
+
 ###Disabling
 
 The plugin is enabled by default. To disable it, set the `g:js_context_colors_enabled` variable
