@@ -29,6 +29,7 @@ your choice. Here is a summary of the commands available:
 
     g:js_context_colors_enabled
     g:js_context_colors
+    g:js_context_colors_insertmode
     g:js_context_colors_usemaps
     g:js_context_colors_colorize_comments
     g:js_context_colors_comment_higroup
@@ -174,6 +175,16 @@ Or to use the comment syntax highlighting from your colorscheme:
 
 This will only take effect if the `g:js_context_colors_colorize_comments` option
 is not set to 1.
+
+###Insert Mode Behaviour
+
+Now does coloring in insert mode! However if you don't like this behaviour (it is 
+more likely to fail as code being written is more likely to be syntactally invalid)
+the jus set the option to false:
+
+	let g:js_context_colors_insertmode = 0
+
+Then it will behave as previous versions of the plugin.
 
 ###Disabling
 

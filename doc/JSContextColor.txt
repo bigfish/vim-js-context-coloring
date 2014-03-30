@@ -74,6 +74,22 @@ See the XtermColorTable plugin to see the 256 color range.
 The default colors are 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey. You may add 
 additional levels if you wish. 
 
+                                                *g:js_context_colors_insertmode*
+
+Whether highlighting is done automatically in insert mode. This will cause the
+syntax highlighting to disappear while the syntax is invalid, which will occur 
+while editing is incomplete. Normally this would only happen after insertmode is exited.
+This may be annoying to some users, though it can also be seen as a validation
+tool, much like jslint. If you don't like it just set this option to 0,
+and the behaviour will be the same as previous versions of the plugin.
+
+I've decided to turn this option on by default, as it immediately highlights 
+function scopes when they are created in insertmode, rather than having 
+erroneous highlighting lingering.
+>
+        let g:js_context_colors_insertmode = 0
+<
+
                                                 *g:js_context_colors_debug*
 
 If set to 1, this enables debug output. 

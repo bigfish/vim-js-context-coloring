@@ -28,6 +28,10 @@ if !exists('g:js_context_colors_usemaps')
     let g:js_context_colors_usemaps = 1
 endif
 
+if !exists('g:js_context_colors_insertmode')
+    let g:js_context_colors_insertmode = 1
+endif
+
 if !exists('g:js_context_colors_colorize_comments')
     let g:js_context_colors_colorize_comments = 0
 endif
@@ -392,21 +396,30 @@ function! JSCC_Enable()
     "if < vim 7.4 TextChanged,TextChangedI events are not
     "available and will result in error E216
     try
-
+        "Note: currently TextChangedI does not take effect until after InsertMode is
+        "exited, thus it is similar to InsertLeave.
         augroup JSContextColorAug
             au!
             au! TextChangedI,TextChanged <buffer> call JSCC_UpdateOnChange()
-            au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
+            if g:js_context_colors_insertmode
+                au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
+            else
+                au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+            endif
         augroup END
 
     catch /^Vim\%((\a\+)\)\=:E216/
 
-        "use different events to trigger update in Vim < 7.4
-        augroup JSContextColorAug
-            au!
-            au! InsertLeave <buffer> :JSContextColor
-            au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
-        augroup END
+            "use different events to trigger update in Vim < 7.4
+            augroup JSContextColorAug
+                au!
+                au! InsertLeave <buffer> :JSContextColor
+                if g:js_context_colors_insertmode
+                    au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
+                else
+                    au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+                endif
+            augroup END
 
     endtry
 
