@@ -381,6 +381,7 @@ function! JSCC_Colorize()
 endfunction
 
 function! JSCC_UpdateOnChange()
+    "don't call if no change to file
     if s:my_changedtick != b:changedtick
         let s:my_changedtick = b:changedtick
         call JSCC_Colorize()
@@ -394,7 +395,8 @@ function! JSCC_Enable()
 
         augroup JSContextColorAug
             au!
-            au! TextChangedI,TextChanged <buffer> :JSContextColor
+            au! TextChangedI,TextChanged <buffer> call JSCC_UpdateOnChange()
+            au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
         augroup END
 
     catch /^Vim\%((\a\+)\)\=:E216/
@@ -403,7 +405,7 @@ function! JSCC_Enable()
         augroup JSContextColorAug
             au!
             au! InsertLeave <buffer> :JSContextColor
-            au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+            au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
         augroup END
 
     endtry
@@ -465,6 +467,6 @@ augroup JSContexColorNoContaminate
     au!
     autocmd WinEnter * let w:jscc_created=1
 
-    autocmd WinEnter * if !exists('w:jscc_created') | :call clearmatches()
+    autocmd WinEnter * if !exists('w:jscc_created') && &filetype != 'javascript' | :call clearmatches()
 
 augroup END
