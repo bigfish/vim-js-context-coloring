@@ -29,7 +29,7 @@ if !exists('g:js_context_colors_usemaps')
 endif
 
 if !exists('g:js_context_colors_insertmode')
-    let g:js_context_colors_insertmode = 1
+    let g:js_context_colors_insertmode = 0
 endif
 
 if !exists('g:js_context_colors_colorize_comments')
@@ -420,7 +420,7 @@ function! JSCC_Enable()
         "exited, thus it is similar to InsertLeave.
         augroup JSContextColorAug
             au!
-            au! TextChangedI,TextChanged <buffer> call JSCC_UpdateOnChange()
+            au! TextChangedI,TextChanged <buffer> :JSContextColor
             if g:js_context_colors_insertmode
                 au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
             else
