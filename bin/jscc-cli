@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 /*jshint node:true, strict:false*/
-var esprima = require('esprima'),
-	eslevels = require('eslevels'),
-	input_js = '';
+var input_js = '';
+var UglifyJS = require("../node_modules/uglify-js/tools/node.js");
+var levels = [];
+var scopes = [];
+var symbols = [];
 
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
@@ -13,21 +15,37 @@ process.stdin.on('data', function(chunk) {
 });
 
 process.stdin.on('end', function() {
-    var syntax = esprima.parse(input_js, {
-                range: true,
-                comment: true,
-                tolerant: true
-			}),
-        levels = eslevels.levels(syntax, {mode:'full'}),
-        comments = [];
+        var toplevel = UglifyJS.parse(input_js);
+        toplevel.figure_out_scope();
 
-        //normalize comments range data to be same as levels data
-        syntax.comments.forEach(function (comment) {
-                comments.push(comment.range);
+
+        var walker = new UglifyJS.TreeWalker(function(node){
+
+                var level;
+
+                if (node instanceof UglifyJS.AST_Scope) {
+
+                        //annotate Scope Nodes with level info
+                        if (node.level === undefined) {
+                                node.level = node.parent_scope ? node.parent_scope.level + 1 : 0;
+                        }
+
+                        scopes.push([node.level,node.start.pos, node.end.endpos]);
+
+                }
+
+                if (node instanceof UglifyJS.AST_Symbol) {
+
+                        if (node.thedef) {
+                                level = node.thedef.scope.level;
+                                symbols.push([level, node.start.pos, node.end.endpos]);
+                        }
+                }
         });
+        toplevel.walk(walker);
 
         process.stdout.write(JSON.stringify({
-                levels: levels,
-                comments: comments
+                scopes: scopes,
+                symbols: symbols
         }));
 });

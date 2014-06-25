@@ -265,6 +265,12 @@ function! GetPosFromOffset(offset)
     return pos
 endfunction
 
+function! HighlightComments()
+        call matchadd('Comment', '\/\/.*$', 100)
+        "non-greedy, multiline regexp
+        call matchadd('Comment', '\/\*\_.\{-}\*\/', 100)
+endfunction
+
 function! HighlightRange(higroup, start, end, priority)
     let group = a:higroup
     let startpos = a:start
@@ -292,10 +298,14 @@ function! s:HighlightRangeList(ranges, ...)
     "capture optional arguments (defaultLevel,hiGroup) 
     "set defaults
     let defaultLevel = 0
+    let baseLevel = 0
     let hiGroup = ""
     "a:0 is the number of optional arguments
     if a:0
             let defaultLevel = a:1
+    endif
+    if a:0 == 1
+            let baseLevel = a:1
     endif
     if a:0 == 2
             let hiGroup = a:2
@@ -328,7 +338,7 @@ function! s:HighlightRangeList(ranges, ...)
         let start_pos = GetPosFromOffset(data[-2])
         let end_pos = GetPosFromOffset(data[-1])
 
-        call HighlightRange(higroup_name, start_pos, end_pos, level)
+        call HighlightRange(higroup_name, start_pos, end_pos, baseLevel + level)
     endfor
 
 endfunction
@@ -368,12 +378,8 @@ function! JSCC_Colorize()
 
         let colordata = eval(colordata_result)
 
-        let levels = colordata.levels
-
-        "initially highlight all text as global
-        "as eslevels does not seem to provide highlight data
-        "for starting and end regions
-        call insert(levels, [0, 0, len(buftext)])
+        let scopes = colordata.scopes
+        let symbols = colordata.symbols
 
         "at this point if we've not thrown an error
         "the syntax was probably valid so lets clear old highlighting
@@ -381,15 +387,12 @@ function! JSCC_Colorize()
             call clearmatches()
         end
 
-        call s:HighlightRangeList(levels)
+        call s:HighlightRangeList(scopes)
+        call s:HighlightRangeList(symbols, 50)
 
         if !g:js_context_colors_colorize_comments
-            let comments = colordata.comments
-            "override level to be 50 -- above all levels but < 100
-            "and override higroup to be comment higroup
-            call s:HighlightRangeList(comments, 50, s:comment_higroup)
+            call HighlightComments()
         endif
-
     catch
 
         if g:js_context_colors_show_error_message || g:js_context_colors_debug
@@ -421,10 +424,11 @@ function! JSCC_Enable()
         augroup JSContextColorAug
             au!
             au! TextChangedI,TextChanged <buffer> :JSContextColor
+            "cursor moved event seems to trigger segfaults?!
             if g:js_context_colors_insertmode
-                au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
+                "au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
             else
-                au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+                "au! CursorMoved <buffer> call JSCC_UpdateOnChange()
             endif
         augroup END
 
@@ -435,9 +439,9 @@ function! JSCC_Enable()
                 au!
                 au! InsertLeave <buffer> :JSContextColor
                 if g:js_context_colors_insertmode
-                    au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
+                    "au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
                 else
-                    au! CursorMoved <buffer> call JSCC_UpdateOnChange()
+                    "au! CursorMoved <buffer> call JSCC_UpdateOnChange()
                 endif
             augroup END
 
