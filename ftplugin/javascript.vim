@@ -4,7 +4,7 @@
 "
 "Note: highlights function scopes in JavaScript
 "use XtermColorTable plugin to see what colors are available
-
+syn clear
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 if !exists('g:js_context_colors')
@@ -277,19 +277,42 @@ function! HighlightRange(higroup, start, end, priority)
     let endpos = a:end
     let priority = s:priority_offset + a:priority
 
+    let topline = line("w0")
+    let botline = line("w$")
+    
+    if start[0] > botline || endpos[0] < topline
+        return
+    }
     "single line regions
     if startpos[0] == endpos[0]
-        call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        call matchaddpos(group, [[startpos[0], startpos[1], endpos[1] - startpos[1]]], priority)
+
+        "exe 'syn match ' . group . ' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c+'
 
     elseif (startpos[0] + 1) == endpos[0]
         "two line regions
-        call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
-        call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
+        call matchaddpos(group, [[startpos[0], startpos[1], len(getline(startpos[0]))]], priority)
+
+        "exe 'syn match ' . group .' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*+'
+        "call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        call matchaddpos(group, [[startpos[0], 0, startpos[1]]], priority)
+        "exe 'syn match ' . group . ' +\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c+'
+
     else
         "multiline regions
-        call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
-        call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority)
-        call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
+        call matchaddpos(group, [[startpos[0], startpos[0],  len(getline(startpos[0]))]], priority)
+        "exe 'syn match ' . group . ' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*+'
+        "call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority)
+        for line in range(startpos[0] + 1, endpos[0] - 1)
+            call matchaddpos(group, [line], priority)
+        endfor
+        "exe 'syn match ' . group .' +\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l+'
+        "call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
+        call matchaddpos(group, [[startpos[0], 0, startpos[1]]], priority)
+        "exe 'syn match ' . group . ' +\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c+'
     endif
 
 endfunction
@@ -373,7 +396,7 @@ function! JSCC_Colorize()
 
     "ignore errors from shell command to prevent distracting user
     "syntax errors should be caught by a lint program
-    try
+    "try
         let colordata_result = system(s:jscc, buftext)
 
         let colordata = eval(colordata_result)
@@ -393,16 +416,16 @@ function! JSCC_Colorize()
         if !g:js_context_colors_colorize_comments
             call HighlightComments()
         endif
-    catch
+    "catch
 
-        if g:js_context_colors_show_error_message || g:js_context_colors_debug
-            echom "Syntax Error [JSContextColors]"
-        endif
+        "if g:js_context_colors_show_error_message || g:js_context_colors_debug
+            "echom "Syntax Error [JSContextColors]"
+        "endif
 
-        if g:js_context_colors_debug
-            echom colordata_result
-        endif
-    endtry
+        "if g:js_context_colors_debug
+            "echom colordata_result
+        "endif
+    "endtry
 
     call setpos('.', save_cursor)
 endfunction
