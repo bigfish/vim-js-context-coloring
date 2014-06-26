@@ -4,8 +4,9 @@
 "
 "Note: highlights function scopes in JavaScript
 "use XtermColorTable plugin to see what colors are available
-syn clear
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
+
+let s:region_count = 1
 
 if !exists('g:js_context_colors')
     "using colors suggested by Douglas Crockford
@@ -199,8 +200,11 @@ function! JSCC_GetColorDef(c)
 
 endfunction
 
+let s:jscc_highlight_groups_defined = 0
+
 "define highlight groups dynamically
 function! JSCC_DefineHighlightGroups()
+
     let c = 0
     for colr in g:js_context_colors
         let colorDef = JSCC_GetColorDef(colr)
@@ -215,6 +219,25 @@ function! JSCC_DefineHighlightGroups()
         "avoid type errors
         unlet colr
     endfor
+
+    "call matchadd('Comment', '\/\/.*$', 100)
+    "non-greedy, multiline regexp
+    "call matchadd('Comment', '\/\*\_.\{-}\*\/', 100)
+    
+    if !g:js_context_colors_colorize_comments
+        syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
+        syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell
+        syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell fold
+        syntax region  javaScriptCvsTag         start="\$\cid:" end="\$" oneline contained
+        syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo,javaScriptCvsTag,@Spell fold
+        hi link javaScriptComment              Comment
+        hi link javaScriptLineComment          Comment
+        hi link javaScriptDocComment           Comment
+        hi link javaScriptCommentTodo          Todo
+    endif
+
+    let s:jscc_highlight_groups_defined = 1
+
 endfunction
 
 "parse functions
@@ -265,55 +288,18 @@ function! GetPosFromOffset(offset)
     return pos
 endfunction
 
-function! HighlightComments()
-        call matchadd('Comment', '\/\/.*$', 100)
-        "non-greedy, multiline regexp
-        call matchadd('Comment', '\/\*\_.\{-}\*\/', 100)
-endfunction
 
-function! HighlightRange(higroup, start, end, priority)
+function! HighlightRange(higroup, start, end, level)
     let group = a:higroup
     let startpos = a:start
     let endpos = a:end
-    let priority = s:priority_offset + a:priority
 
-    let topline = line("w0")
-    let botline = line("w$")
-    
-    if start[0] > botline || endpos[0] < topline
-        return
-    }
-    "single line regions
-    if startpos[0] == endpos[0]
-        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c' , priority)
-        call matchaddpos(group, [[startpos[0], startpos[1], endpos[1] - startpos[1]]], priority)
-
-        "exe 'syn match ' . group . ' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*\%<' . (endpos[1] + 1) . 'c+'
-
-    elseif (startpos[0] + 1) == endpos[0]
-        "two line regions
-        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
-        call matchaddpos(group, [[startpos[0], startpos[1], len(getline(startpos[0]))]], priority)
-
-        "exe 'syn match ' . group .' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*+'
-        "call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
-        call matchaddpos(group, [[startpos[0], 0, startpos[1]]], priority)
-        "exe 'syn match ' . group . ' +\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c+'
-
-    else
-        "multiline regions
-        "call matchadd(group, '\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*', priority)
-        call matchaddpos(group, [[startpos[0], startpos[0],  len(getline(startpos[0]))]], priority)
-        "exe 'syn match ' . group . ' +\%' . startpos[0] . 'l\%>' . (startpos[1] - 1) . 'c.*+'
-        "call matchadd(group, '\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l', priority)
-        for line in range(startpos[0] + 1, endpos[0] - 1)
-            call matchaddpos(group, [line], priority)
-        endfor
-        "exe 'syn match ' . group .' +\%>' . startpos[0] . 'l.*\%<' . endpos[0] . 'l+'
-        "call matchadd(group, '\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c' , priority)
-        call matchaddpos(group, [[startpos[0], 0, startpos[1]]], priority)
-        "exe 'syn match ' . group . ' +\%' . endpos[0] . 'l.*\%<' . (endpos[1] + 1) . 'c+'
-    endif
+    let s:region_count = s:region_count + 1
+    let group_name = group  . s:region_count
+    let cmd = "syn region ". group_name  . " start='\\%" . startpos[0] ."l\\%". startpos[1] ."c' end='\\%" . endpos[0] . "l\\%" . endpos[1] . "c' contains=ALL"
+    "echom cmd
+    exe cmd
+    exe 'hi link ' . group_name . ' ' . 'JSCC_Level_' . a:level
 
 endfunction
 
@@ -353,7 +339,7 @@ function! s:HighlightRangeList(ranges, ...)
         if hiGroup != ""
             let higroup_name = hiGroup
         else
-            let higroup_name = 'JSCC_Level_' . level
+            let higroup_name = 'Level' . level
         endif
 
         "get line number from offset
@@ -361,16 +347,21 @@ function! s:HighlightRangeList(ranges, ...)
         let start_pos = GetPosFromOffset(data[-2])
         let end_pos = GetPosFromOffset(data[-1])
 
-        call HighlightRange(higroup_name, start_pos, end_pos, baseLevel + level)
+        call HighlightRange(higroup_name, start_pos, end_pos, level)
     endfor
 
 endfunction
 
 function! JSCC_Colorize()
 
-    if g:js_context_colors_no_highlight_on_syntax_error
-        call clearmatches()
-    endif
+    let s:region_count = 0
+
+    syntax clear
+    syntax manual
+
+    "if !s:jscc_highlight_groups_defined
+        call JSCC_DefineHighlightGroups()
+    "endif
 
     let save_cursor = getpos(".")
 
@@ -396,7 +387,7 @@ function! JSCC_Colorize()
 
     "ignore errors from shell command to prevent distracting user
     "syntax errors should be caught by a lint program
-    "try
+    try
         let colordata_result = system(s:jscc, buftext)
 
         let colordata = eval(colordata_result)
@@ -404,28 +395,27 @@ function! JSCC_Colorize()
         let scopes = colordata.scopes
         let symbols = colordata.symbols
 
-        "at this point if we've not thrown an error
-        "the syntax was probably valid so lets clear old highlighting
-        if !g:js_context_colors_no_highlight_on_syntax_error
-            call clearmatches()
-        end
-
         call s:HighlightRangeList(scopes)
-        call s:HighlightRangeList(symbols, 50)
+        call s:HighlightRangeList(symbols)
 
-        if !g:js_context_colors_colorize_comments
-            call HighlightComments()
+    catch
+
+        if g:js_context_colors_show_error_message || g:js_context_colors_debug
+            echom "Syntax Error [JSContextColors]"
         endif
-    "catch
 
-        "if g:js_context_colors_show_error_message || g:js_context_colors_debug
-            "echom "Syntax Error [JSContextColors]"
-        "endif
+        if g:js_context_colors_debug
+            echom colordata_result
+        endif
 
-        "if g:js_context_colors_debug
-            "echom colordata_result
-        "endif
-    "endtry
+        if g:js_context_colors_no_highlight_on_syntax_error
+            syntax clear
+            syntax enable
+            "restoring default javascript syntax -- this will destroy custom
+            "groups so set a flag so we can redefine them when needed
+            let s:jscc_highlight_groups_defined = 0
+        endif
+    endtry
 
     call setpos('.', save_cursor)
 endfunction
@@ -475,7 +465,7 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
-    call clearmatches()
+    syntax enable
     augroup JSContextColorAug
         au!
     augroup END
@@ -520,13 +510,13 @@ if g:js_context_colors_usemaps
     endif
 endif
 
-"prevent contamination of split windows
-"http://vim.wikia.com/wiki/Detect_window_creation_with_WinEnter
-augroup JSContexColorNoContaminate
+""prevent contamination of split windows
+""http://vim.wikia.com/wiki/Detect_window_creation_with_WinEnter
+"augroup JSContexColorNoContaminate
 
-    au!
-    autocmd WinEnter * let w:jscc_created=1
+    "au!
+    "autocmd WinEnter * let w:jscc_created=1
 
-    autocmd WinEnter * if !exists('w:jscc_created') && &filetype != 'javascript' | :call clearmatches()
+    "autocmd WinEnter * if !exists('w:jscc_created') && &filetype != 'javascript' | :call clearmatches()
 
-augroup END
+"augroup END

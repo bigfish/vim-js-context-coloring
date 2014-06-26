@@ -6,6 +6,7 @@ var UglifyJS = require("../node_modules/uglify-js/tools/node.js");
 var levels = [];
 var scopes = [];
 var symbols = [];
+var propertyRE = /(\s*\.[a-zA-Z0-9$_]+)/gm
 
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
@@ -32,14 +33,19 @@ process.stdin.on('end', function() {
 
                         scopes.push([node.level,node.start.pos, node.end.endpos]);
 
-                }
-
-                if (node instanceof UglifyJS.AST_Symbol) {
+                } else if (node instanceof UglifyJS.AST_Symbol) {
 
                         if (node.thedef) {
                                 level = node.thedef.scope.level;
-                                symbols.push([level, node.start.pos, node.end.endpos]);
+                                //include accessors (properties / methods) in same scope as parent
+                                propertyRE.lastIndex = node.end.endpos;
+                                var matches = propertyRE.exec(input_js);
+                                if (matches) {
+                                    symbols.push([level, node.start.pos, propertyRE.lastIndex]);
+                                }
                         }
+                } else if (node instanceof UglifyJS.AST_PropAccess) {
+
                 }
         });
         toplevel.walk(walker);
