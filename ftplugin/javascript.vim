@@ -301,56 +301,10 @@ function! HighlightRange(higroup, start, end, level)
     exe cmd
     exe 'hi link ' . group_name . ' ' . 'JSCC_Level_' . a:level
 
-endfunction
-
-function! s:HighlightRangeList(ranges, ...)
-    "capture optional arguments (defaultLevel,hiGroup) 
-    "set defaults
-    let defaultLevel = 0
-    let baseLevel = 0
-    let hiGroup = ""
-    "a:0 is the number of optional arguments
-    if a:0
-            let defaultLevel = a:1
-    endif
-    if a:0 == 1
-            let baseLevel = a:1
-    endif
-    if a:0 == 2
-            let hiGroup = a:2
-    endif
-
-    for data in a:ranges
-
-        "if we have 3 elements, use first as level
-        if len(data) == 3
-            let level = data[0]
-        else
-            let level = defaultLevel
-        endif
-
-        "normalize implied globals (-1)
-        "TODO: they could be highlighted differently?
-        if level == -1
-            let level = 0
-        endif
-
-        "use hiGroup if given or else use level
-        if hiGroup != ""
-            let higroup_name = hiGroup
-        else
-            let higroup_name = 'Level' . level
-        endif
-
-        "get line number from offset
-        "use offset from end to normalize 3 element and 2 element ranges
-        let start_pos = GetPosFromOffset(data[-2])
-        let end_pos = GetPosFromOffset(data[-1])
-
-        call HighlightRange(higroup_name, start_pos, end_pos, level)
-    endfor
+    return group_name
 
 endfunction
+
 
 function! JSCC_Colorize()
 
@@ -359,9 +313,7 @@ function! JSCC_Colorize()
     syntax clear
     syntax manual
 
-    "if !s:jscc_highlight_groups_defined
-        call JSCC_DefineHighlightGroups()
-    "endif
+    call JSCC_DefineHighlightGroups()
 
     let save_cursor = getpos(".")
 
@@ -393,10 +345,27 @@ function! JSCC_Colorize()
         let colordata = eval(colordata_result)
 
         let scopes = colordata.scopes
-        let symbols = colordata.symbols
+        "let symbols = colordata.symbols
 
-        call s:HighlightRangeList(scopes)
-        call s:HighlightRangeList(symbols)
+        for scope in scopes
+
+            "use offset from end to normalize 3 element and 2 element ranges
+            let start_pos = GetPosFromOffset(scope[1])
+            let end_pos = GetPosFromOffset(scope[2])
+            let group_name = 'Level' . scope[0]
+            let level = scope[0]
+
+            let scope_group =  HighlightRange(group_name, start_pos, end_pos, level)
+
+            let enclosed = scope[3]
+
+            for var in keys(enclosed)
+                let level = enclosed[var]
+                let cmd = "syn keyword ". 'JSCC_Level_' . level . ' ' . var . " contained containedin=" . scope_group
+                "echom cmd
+                exe cmd
+            endfor
+        endfor
 
     catch
 
@@ -409,13 +378,20 @@ function! JSCC_Colorize()
         endif
 
         if g:js_context_colors_no_highlight_on_syntax_error
-            syntax clear
+
+            "syntax clear
             syntax enable
-            "restoring default javascript syntax -- this will destroy custom
-            "groups so set a flag so we can redefine them when needed
-            let s:jscc_highlight_groups_defined = 0
+
+            "the above command destroys Powerline highlighting -- so reload it
+            if exists('g:Powerline_loaded')
+                call Pl#Load()
+            endif
+
         endif
     endtry
+
+    "ensure syntax highlighting is fully applied
+    syntax sync fromstart
 
     call setpos('.', save_cursor)
 endfunction

@@ -3,10 +3,7 @@
 /*jshint node:true, strict:false*/
 var input_js = '';
 var UglifyJS = require("../node_modules/uglify-js/tools/node.js");
-var levels = [];
 var scopes = [];
-var symbols = [];
-var propertyRE = /(\s*\.[a-zA-Z0-9$_]+)/gm
 
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
@@ -29,29 +26,19 @@ process.stdin.on('end', function() {
                         //annotate Scope Nodes with level info
                         if (node.level === undefined) {
                                 node.level = node.parent_scope ? node.parent_scope.level + 1 : 0;
+                                var enclosed = {};
+                                node.enclosed.forEach(function(v) {
+                                        enclosed[v.name] = v.scope.level
+                                        });
+                                scopes.push([node.level, node.start.pos, node.end.endpos, enclosed]);
                         }
 
-                        scopes.push([node.level,node.start.pos, node.end.endpos]);
-
-                } else if (node instanceof UglifyJS.AST_Symbol) {
-
-                        if (node.thedef) {
-                                level = node.thedef.scope.level;
-                                //include accessors (properties / methods) in same scope as parent
-                                propertyRE.lastIndex = node.end.endpos;
-                                var matches = propertyRE.exec(input_js);
-                                if (matches) {
-                                    symbols.push([level, node.start.pos, propertyRE.lastIndex]);
-                                }
-                        }
-                } else if (node instanceof UglifyJS.AST_PropAccess) {
 
                 }
         });
         toplevel.walk(walker);
 
         process.stdout.write(JSON.stringify({
-                scopes: scopes,
-                symbols: symbols
+                scopes: scopes
         }));
 });
