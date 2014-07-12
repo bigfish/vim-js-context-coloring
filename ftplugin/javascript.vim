@@ -311,7 +311,6 @@ function! JSCC_Colorize()
     let s:region_count = 0
 
     syntax clear
-    syntax manual
 
     call JSCC_DefineHighlightGroups()
 
