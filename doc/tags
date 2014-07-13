@@ -1,0 +1,14 @@
+:JSContextColor	JSContextColor.txt	/*:JSContextColor*
+:JSContextColorToggle	JSContextColor.txt	/*:JSContextColorToggle*
+:JSContextColorUpdate	JSContextColor.txt	/*:JSContextColorUpdate*
+JSContextColor	JSContextColor.txt	/*JSContextColor*
+g:js_context_colors	JSContextColor.txt	/*g:js_context_colors*
+g:js_context_colors_colorize_comments	JSContextColor.txt	/*g:js_context_colors_colorize_comments*
+g:js_context_colors_comment_higroup	JSContextColor.txt	/*g:js_context_colors_comment_higroup*
+g:js_context_colors_debug	JSContextColor.txt	/*g:js_context_colors_debug*
+g:js_context_colors_enabled	JSContextColor.txt	/*g:js_context_colors_enabled*
+g:js_context_colors_insertmode	JSContextColor.txt	/*g:js_context_colors_insertmode*
+g:js_context_colors_no_highlight_on_syntax_error	JSContextColor.txt	/*g:js_context_colors_no_highlight_on_syntax_error*
+g:js_context_colors_show_error_message	JSContextColor.txt	/*g:js_context_colors_show_error_message*
+g:js_context_colors_usemaps	JSContextColor.txt	/*g:js_context_colors_usemaps*
+not	JSContextColor.txt	/*not*

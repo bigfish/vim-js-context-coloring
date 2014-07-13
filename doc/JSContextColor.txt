@@ -74,23 +74,6 @@ See the XtermColorTable plugin to see the 256 color range.
 The default colors are 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey. You may add 
 additional levels if you wish. 
 
-                                                *g:js_context_colors_insertmode*
-
-Whether highlighting is done automatically in insert mode. This will cause the
-syntax highlighting to disappear while the syntax is invalid, which will occur 
-while editing is incomplete. Normally this would only happen after insertmode is exited.
-This may be annoying to some users, though it can also be seen as a validation
-tool, much like jslint. If you don't like it just set this option to 0,
-and the behaviour will be the same as previous versions of the plugin.
-
-I've decided to turn this option on by default, as it immediately highlights 
-function scopes when they are created in insertmode, rather than having 
-erroneous highlighting lingering.
->
-        let g:js_context_colors_insertmode = 0
-<
-
-
                                                 *g:js_context_colors_no_highlight_on_syntax_error*
 
 When the syntax is invalid, the plugin cannot provide highlighting.
@@ -109,7 +92,6 @@ so you may see incorrect highlighting temporarily.
 
                                                 *g:js_context_colors_show_error_message*
 
-###Error Message
 When the plugin fails to get a valid response from the parser script, it
 will show an error... it will also not highlight. This is most likely a syntax error,
 but it could also be a problem with the CLI script (perhaps it was not installed).
@@ -139,25 +121,6 @@ If you want this enable this behaviour, set the option to 1:
 This will highlight comments as the comment higroup (see next section). 
 
 <
-
-                                                *g:js_context_colors_comment_higroup*
-
-A highlight group to use for comments (default is grey)
-
->
-	highlight MyComment ctermfg=red
-
-	let g:js_context_colors_comment_higroup = 'MyComment'
-<
-
-Or to use the comment syntax highlighting from your colorscheme:
-
->
-	let g:js_context_colors_comment_higroup = 'Comment'
-<
-
-This will only take effect if the `g:js_context_colors_colorize_comments` option
-is not set to 1.
 
                                                 *g:js_context_colors_usemaps*
 

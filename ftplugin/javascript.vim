@@ -8,19 +8,6 @@ let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
 
-if !exists('g:js_context_colors')
-    "using colors suggested by Douglas Crockford
-    "1) white: 15
-    "2) green: 2
-    "3) yellow: 3
-    "4) blue: 4
-    "5) red: 1
-    "6) cyan: 6
-    "7) grey: 7
-    let g:js_context_colors = [ 15, 2, 3, 4, 1, 6, 7 ]
-
-endif
-
 if !exists('g:js_context_colors_enabled')
     let g:js_context_colors_enabled = 1
 endif
@@ -29,216 +16,21 @@ if !exists('g:js_context_colors_usemaps')
     let g:js_context_colors_usemaps = 1
 endif
 
-if !exists('g:js_context_colors_insertmode')
-    let g:js_context_colors_insertmode = 0
-endif
-
 if !exists('g:js_context_colors_colorize_comments')
     let g:js_context_colors_colorize_comments = 0
-endif
-
-if exists('g:js_context_colors_comment_higroup')
-    let s:comment_higroup = g:js_context_colors_comment_higroup
-else
-    "default Comment colour: gray
-    highlight JSCC_CommentHigroup ctermfg=243
-    let s:comment_higroup = 'JSCC_CommentHigroup'
 endif
 
 if !exists('g:js_context_colors_show_error_message')
     let g:js_context_colors_show_error_message = 0
 endif
 
-if !exists('g:js_context_colors_no_highlight_on_syntax_error')
-    let g:js_context_colors_no_highlight_on_syntax_error = 1
-endif
-
 if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
 
-let s:my_changedtick = b:changedtick
-
 "offset highlight priority negatively so that it does not clobber hlsearch (priority 0)
 let s:priority_offset = -100
 
-"xterm -- hex RGB colors taken from XTerm Color Table (highly recommended!)
-let s:xterm_colors = {
-            \ '0':   '#000000', '1':   '#800000', '2':   '#008000', '3':   '#808000', '4':   '#000080',
-            \ '5':   '#800080', '6':   '#008080', '7':   '#c0c0c0', '8':   '#808080', '9':   '#ff0000',
-            \ '10':  '#00ff00', '11':  '#ffff00', '12':  '#0000ff', '13':  '#ff00ff', '14':  '#00ffff',
-            \ '15':  '#ffffff', '16':  '#000000', '17':  '#00005f', '18':  '#000087', '19':  '#0000af',
-            \ '20':  '#0000df', '21':  '#0000ff', '22':  '#005f00', '23':  '#005f5f', '24':  '#005f87',
-            \ '25':  '#005faf', '26':  '#005fdf', '27':  '#005fff', '28':  '#008700', '29':  '#00875f',
-            \ '30':  '#008787', '31':  '#0087af', '32':  '#0087df', '33':  '#0087ff', '34':  '#00af00',
-            \ '35':  '#00af5f', '36':  '#00af87', '37':  '#00afaf', '38':  '#00afdf', '39':  '#00afff',
-            \ '40':  '#00df00', '41':  '#00df5f', '42':  '#00df87', '43':  '#00dfaf', '44':  '#00dfdf',
-            \ '45':  '#00dfff', '46':  '#00ff00', '47':  '#00ff5f', '48':  '#00ff87', '49':  '#00ffaf',
-            \ '50':  '#00ffdf', '51':  '#00ffff', '52':  '#5f0000', '53':  '#5f005f', '54':  '#5f0087',
-            \ '55':  '#5f00af', '56':  '#5f00df', '57':  '#5f00ff', '58':  '#5f5f00', '59':  '#5f5f5f',
-            \ '60':  '#5f5f87', '61':  '#5f5faf', '62':  '#5f5fdf', '63':  '#5f5fff', '64':  '#5f8700',
-            \ '65':  '#5f875f', '66':  '#5f8787', '67':  '#5f87af', '68':  '#5f87df', '69':  '#5f87ff',
-            \ '70':  '#5faf00', '71':  '#5faf5f', '72':  '#5faf87', '73':  '#5fafaf', '74':  '#5fafdf',
-            \ '75':  '#5fafff', '76':  '#5fdf00', '77':  '#5fdf5f', '78':  '#5fdf87', '79':  '#5fdfaf',
-            \ '80':  '#5fdfdf', '81':  '#5fdfff', '82':  '#5fff00', '83':  '#5fff5f', '84':  '#5fff87',
-            \ '85':  '#5fffaf', '86':  '#5fffdf', '87':  '#5fffff', '88':  '#870000', '89':  '#87005f',
-            \ '90':  '#870087', '91':  '#8700af', '92':  '#8700df', '93':  '#8700ff', '94':  '#875f00',
-            \ '95':  '#875f5f', '96':  '#875f87', '97':  '#875faf', '98':  '#875fdf', '99':  '#875fff',
-            \ '100': '#878700', '101': '#87875f', '102': '#878787', '103': '#8787af', '104': '#8787df',
-            \ '105': '#8787ff', '106': '#87af00', '107': '#87af5f', '108': '#87af87', '109': '#87afaf',
-            \ '110': '#87afdf', '111': '#87afff', '112': '#87df00', '113': '#87df5f', '114': '#87df87',
-            \ '115': '#87dfaf', '116': '#87dfdf', '117': '#87dfff', '118': '#87ff00', '119': '#87ff5f',
-            \ '120': '#87ff87', '121': '#87ffaf', '122': '#87ffdf', '123': '#87ffff', '124': '#af0000',
-            \ '125': '#af005f', '126': '#af0087', '127': '#af00af', '128': '#af00df', '129': '#af00ff',
-            \ '130': '#af5f00', '131': '#af5f5f', '132': '#af5f87', '133': '#af5faf', '134': '#af5fdf',
-            \ '135': '#af5fff', '136': '#af8700', '137': '#af875f', '138': '#af8787', '139': '#af87af',
-            \ '140': '#af87df', '141': '#af87ff', '142': '#afaf00', '143': '#afaf5f', '144': '#afaf87',
-            \ '145': '#afafaf', '146': '#afafdf', '147': '#afafff', '148': '#afdf00', '149': '#afdf5f',
-            \ '150': '#afdf87', '151': '#afdfaf', '152': '#afdfdf', '153': '#afdfff', '154': '#afff00',
-            \ '155': '#afff5f', '156': '#afff87', '157': '#afffaf', '158': '#afffdf', '159': '#afffff',
-            \ '160': '#df0000', '161': '#df005f', '162': '#df0087', '163': '#df00af', '164': '#df00df',
-            \ '165': '#df00ff', '166': '#df5f00', '167': '#df5f5f', '168': '#df5f87', '169': '#df5faf',
-            \ '170': '#df5fdf', '171': '#df5fff', '172': '#df8700', '173': '#df875f', '174': '#df8787',
-            \ '175': '#df87af', '176': '#df87df', '177': '#df87ff', '178': '#dfaf00', '179': '#dfaf5f',
-            \ '180': '#dfaf87', '181': '#dfafaf', '182': '#dfafdf', '183': '#dfafff', '184': '#dfdf00',
-            \ '185': '#dfdf5f', '186': '#dfdf87', '187': '#dfdfaf', '188': '#dfdfdf', '189': '#dfdfff',
-            \ '190': '#dfff00', '191': '#dfff5f', '192': '#dfff87', '193': '#dfffaf', '194': '#dfffdf',
-            \ '195': '#dfffff', '196': '#ff0000', '197': '#ff005f', '198': '#ff0087', '199': '#ff00af',
-            \ '200': '#ff00df', '201': '#ff00ff', '202': '#ff5f00', '203': '#ff5f5f', '204': '#ff5f87',
-            \ '205': '#ff5faf', '206': '#ff5fdf', '207': '#ff5fff', '208': '#ff8700', '209': '#ff875f',
-            \ '210': '#ff8787', '211': '#ff87af', '212': '#ff87df', '213': '#ff87ff', '214': '#ffaf00',
-            \ '215': '#ffaf5f', '216': '#ffaf87', '217': '#ffafaf', '218': '#ffafdf', '219': '#ffafff',
-            \ '220': '#ffdf00', '221': '#ffdf5f', '222': '#ffdf87', '223': '#ffdfaf', '224': '#ffdfdf',
-            \ '225': '#ffdfff', '226': '#ffff00', '227': '#ffff5f', '228': '#ffff87', '229': '#ffffaf',
-            \ '230': '#ffffdf', '231': '#ffffff', '232': '#080808', '233': '#121212', '234': '#1c1c1c',
-            \ '235': '#262626', '236': '#303030', '237': '#3a3a3a', '238': '#444444', '239': '#4e4e4e',
-            \ '240': '#585858', '241': '#606060', '242': '#666666', '243': '#767676', '244': '#808080',
-            \ '245': '#8a8a8a', '246': '#949494', '247': '#9e9e9e', '248': '#a8a8a8', '249': '#b2b2b2',
-            \ '250': '#bcbcbc', '251': '#c6c6c6', '252': '#d0d0d0', '253': '#dadada', '254': '#e4e4e4',
-            \ '255': '#eeeeee', 'fg': 'fg', 'bg': 'bg', 'NONE': 'NONE' }
-
-let s:TermColorNames = [  'black',
-            \ 'darkblue',
-            \ 'darkgreen',
-            \ 'darkcyan',
-            \ 'darkred',
-            \ 'darkmagenta',
-            \ 'brown',
-            \ 'darkyellow',
-            \ 'lightgray',
-            \ 'lightgrey',
-            \ 'gray',
-            \ 'grey',
-            \ 'darkgray',
-            \ 'darkgrey',
-            \ 'blue',
-            \ 'lightblue',
-            \ 'green',
-            \ 'lightgreen',
-            \ 'cyan',
-            \ 'lightcyan',
-            \ 'red',
-            \ 'lightred',
-            \ 'magenta',
-            \ 'lightmagenta',
-            \ 'yellow',
-            \ 'lightyellow',
-            \ 'white' ] 
-
-" Accepts a terminal color number OR a hexadecimal string color OR a color name
-" and returns a color Dictionary 
-function! JSCC_GetColorDef(c)
-
-    "set defaults
-    let colorDef = { 'ctermfg': 'fg', 'ctermbg': 'NONE', 'guifg': 'fg', 'guibg': 'NONE'}
-    
-    "allow custom color definition dictionaries
-    "this allows the possibility of background colors
-    if type(a:c) == type({})
-        for k in keys(a:c)
-            let colorDef[k] = a:c[k]
-        endfor
-        return colorDef
-    endif
-
-    "normalize color as lowercase string
-    if type(a:c) != type("string")
-        let col = tolower(string(a:c))
-    else
-        let col = tolower(a:c)
-    endif
-
-    "try to find a matching terminal color
-    for [term, hex] in items(s:xterm_colors)
-        if (col == term || col == hex)
-            let colorDef.ctermfg = term
-            let colorDef.guifg = hex
-            return colorDef
-        endif
-    endfor
-
-    "if we did not match a term color number it may be a terminal color name
-    "these are safe for terminal or gui use
-    if index(s:TermColorNames, col) != -1
-        let colorDef.ctermfg = col
-        let colorDef.guifg = col
-        return colorDef
-    endif
-
-    "finally, it is possible the color is a GUI color name (only)
-    "and so if we are in gui, we try this value for guifg only
-    " if has("gui_running")
-    let colorDef.guifg = col
-    return colorDef
-    " endif
-
-    if g:js_context_colors_debug
-        call Warn("Warning!: unsupported color: " . col . ' [JavaScript Context Color]')
-    endif
-
-    return colorDef
-
-endfunction
-
-let s:jscc_highlight_groups_defined = 0
-
-"define highlight groups dynamically
-function! JSCC_DefineHighlightGroups()
-
-    let c = 0
-    for colr in g:js_context_colors
-        let colorDef = JSCC_GetColorDef(colr)
-        if type(colorDef) == type({})
-            exe 'highlight JSCC_Level_' . c .
-                        \ ' ctermfg=' . colorDef.ctermfg .
-                        \ ' ctermbg=' . colorDef.ctermbg .
-                        \ ' guifg=' . colorDef.guifg .
-                        \ ' guibg=' . colorDef.guibg
-        endif
-        let c += 1
-        "avoid type errors
-        unlet colr
-    endfor
-
-    "call matchadd('Comment', '\/\/.*$', 100)
-    "non-greedy, multiline regexp
-    "call matchadd('Comment', '\/\*\_.\{-}\*\/', 100)
-    
-    if !g:js_context_colors_colorize_comments
-        syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
-        syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell
-        syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo,@Spell fold
-        syntax region  javaScriptCvsTag         start="\$\cid:" end="\$" oneline contained
-        syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo,javaScriptCvsTag,@Spell fold
-        hi link javaScriptComment              Comment
-        hi link javaScriptLineComment          Comment
-        hi link javaScriptDocComment           Comment
-        hi link javaScriptCommentTodo          Todo
-    endif
-
-    let s:jscc_highlight_groups_defined = 1
-
-endfunction
 
 "parse functions
 function! Strip(input_string)
@@ -305,6 +97,22 @@ function! HighlightRange(higroup, start, end, level)
 
 endfunction
 
+let s:jscc_highlight_groups_defined = 0
+
+"define highlight groups dynamically
+function! JSCC_DefineHighlightGroups()
+
+    colors js_context_colors
+
+    "define JavaScript comments syntax
+    syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
+    syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo
+    syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo fold
+    syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
+
+    let s:jscc_highlight_groups_defined = 0
+endfunction
+
 
 function! JSCC_Colorize()
 
@@ -312,9 +120,9 @@ function! JSCC_Colorize()
 
     syntax clear
 
-    call JSCC_DefineHighlightGroups()
-
-    let save_cursor = getpos(".")
+    if !s:jscc_highlight_groups_defined
+        call JSCC_DefineHighlightGroups()
+    endif
 
     let buflines = getline(1, '$')
 
@@ -359,10 +167,13 @@ function! JSCC_Colorize()
             let enclosed = scope[3]
 
             for var in keys(enclosed)
-                let level = enclosed[var]
-                let cmd = "syn keyword ". 'JSCC_Level_' . level . ' ' . var . " contained containedin=" . scope_group
-                "echom cmd
-                exe cmd
+                let var_level = enclosed[var]
+                "ignore vars which are contained in deeper scopes
+                "-- they will be defined with those scopes
+                if var_level < level
+                    let cmd = "syn keyword ". 'JSCC_Level_' . var_level . ' ' . var . " display contained containedin=" . scope_group
+                    exe cmd
+                endif
             endfor
         endfor
 
@@ -376,34 +187,20 @@ function! JSCC_Colorize()
             echom colordata_result
         endif
 
-        if g:js_context_colors_no_highlight_on_syntax_error
-
-            "syntax clear
-            syntax enable
-
-            "the above command destroys Powerline highlighting -- so reload it
-            if exists('g:Powerline_loaded')
-                call Pl#Load()
-            endif
-
-        endif
     endtry
 
     "ensure syntax highlighting is fully applied
     syntax sync fromstart
 
-    call setpos('.', save_cursor)
 endfunction
 
-function! JSCC_UpdateOnChange()
-    "don't call if no change to file
-    if s:my_changedtick != b:changedtick
-        let s:my_changedtick = b:changedtick
-        call JSCC_Colorize()
-    endif
-endfunction
 
 function! JSCC_Enable()
+
+    if !s:jscc_highlight_groups_defined
+        call JSCC_DefineHighlightGroups()
+    endif
+
     "if < vim 7.4 TextChanged,TextChangedI events are not
     "available and will result in error E216
     try
@@ -412,12 +209,6 @@ function! JSCC_Enable()
         augroup JSContextColorAug
             au!
             au! TextChangedI,TextChanged <buffer> :JSContextColor
-            "cursor moved event seems to trigger segfaults?!
-            if g:js_context_colors_insertmode
-                "au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
-            else
-                "au! CursorMoved <buffer> call JSCC_UpdateOnChange()
-            endif
         augroup END
 
     catch /^Vim\%((\a\+)\)\=:E216/
@@ -426,11 +217,6 @@ function! JSCC_Enable()
             augroup JSContextColorAug
                 au!
                 au! InsertLeave <buffer> :JSContextColor
-                if g:js_context_colors_insertmode
-                    "au! CursorMoved,CursorMovedI <buffer> call JSCC_UpdateOnChange()
-                else
-                    "au! CursorMoved <buffer> call JSCC_UpdateOnChange()
-                endif
             augroup END
 
     endtry
@@ -440,10 +226,11 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
-    syntax enable
     augroup JSContextColorAug
         au!
     augroup END
+    syntax enable
+    let s:jscc_highlight_groups_defined = 0
 endfunction
 
 function! JSCC_Toggle()
@@ -466,13 +253,6 @@ command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
 "always create color highlight groups in case of direct calls to :JSContextColor
 :JSContextColorUpdate
-
-"define highlight group and do colorizing once for buffer
-if g:js_context_colors_enabled
-    call JSCC_Enable()
-endif
-
-
 if g:js_context_colors_usemaps
     if !hasmapto('<Plug>JSContextColor')
         "mnemonic (h)ighlight
@@ -484,14 +264,3 @@ if g:js_context_colors_usemaps
         nnoremap <buffer> <silent> <localleader>t :JSContextColorToggle<CR>
     endif
 endif
-
-""prevent contamination of split windows
-""http://vim.wikia.com/wiki/Detect_window_creation_with_WinEnter
-"augroup JSContexColorNoContaminate
-
-    "au!
-    "autocmd WinEnter * let w:jscc_created=1
-
-    "autocmd WinEnter * if !exists('w:jscc_created') && &filetype != 'javascript' | :call clearmatches()
-
-"augroup END
