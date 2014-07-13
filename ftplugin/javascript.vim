@@ -86,34 +86,19 @@ function! GetPosFromOffset(offset)
     return pos
 endfunction
 
-
-function! HighlightRange(higroup, start, end, level)
-    let group = a:higroup
-    let startpos = a:start
-    let endpos = a:end
-
-    let s:region_count = s:region_count + 1
-    let group_name = group  . s:region_count
-    let cmd = "syn region ". group_name  . " start='\\%" . startpos[0] ."l\\%". startpos[1] ."c' end='\\%" . endpos[0] . "l\\%" . endpos[1] . "c' contains=ALL fold"
-    "echom cmd
-    exe cmd
-    exe 'hi link ' . group_name . ' ' . 'JSCC_Level_' . a:level
-
-    return group_name
-
-endfunction
-
 let s:jscc_highlight_groups_defined = 0
 
-function! JSCC_DefineCommentSyntaxGroups()
+function! JSCC_DefineSyntaxGroups()
 
-    "define JavaScript comments syntax -- all syntax is cleared when
+    "define JavaScript syntax groups -- all syntax is cleared when
     "colorizing is done, so they must be redefined
     syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
     syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo
     syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo fold
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
+    syntax region  javaScriptStringD        start=+"+  skip=+\\\\\|\\$"+  end=+"+
+    syntax region  javaScriptStringS        start=+'+  skip=+\\\\\|\\$'+  end=+'+
 endfunction
 
 "define highlight groups dynamically
@@ -132,7 +117,7 @@ function! JSCC_Colorize()
     syntax clear
 
     if !g:js_context_colors_colorize_comments
-        call JSCC_DefineCommentSyntaxGroups()
+        call JSCC_DefineSyntaxGroups()
     endif
 
     if !s:jscc_highlight_groups_defined
@@ -177,7 +162,13 @@ function! JSCC_Colorize()
             let group_name = 'Level' . scope[0]
             let level = scope[0]
 
-            let scope_group =  HighlightRange(group_name, start_pos, end_pos, level)
+            let s:region_count = s:region_count + 1
+            let scope_group = group_name . s:region_count
+
+            let cmd = "syn region ". scope_group . " start='\\%" . start_pos[0] ."l\\%". start_pos[1] ."c' end='\\%" . end_pos[0] . "l\\%" . end_pos[1] . "c' contains=ALL fold"
+            "echom cmd
+            exe cmd
+            exe 'hi link ' . scope_group . ' ' . 'JSCC_Level_' . level
 
             let enclosed = scope[3]
 
