@@ -1,5 +1,5 @@
 "plugin to add javascript scope-coloring
-"Version: 0.0.6
+"Version: 0.0.7
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
@@ -7,6 +7,8 @@
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
+
+let s:orig_foldmethod=&foldmethod
 
 if !exists('g:js_context_colors_enabled')
     let g:js_context_colors_enabled = 1
@@ -20,6 +22,14 @@ if !exists('g:js_context_colors_colorize_comments')
     let g:js_context_colors_colorize_comments = 0
 endif
 
+if !exists('g:js_context_colors_fold')
+    let g:js_context_colors_fold = 1
+endif
+
+if !exists('g:js_context_colors_foldlevel')
+    let g:js_context_colors_foldlevel = 9
+endif
+
 if !exists('g:js_context_colors_show_error_message')
     let g:js_context_colors_show_error_message = 0
 endif
@@ -27,10 +37,6 @@ endif
 if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
-
-"offset highlight priority negatively so that it does not clobber hlsearch (priority 0)
-let s:priority_offset = -100
-
 
 "parse functions
 function! Strip(input_string)
@@ -64,7 +70,7 @@ function! IsPos(pos)
 endfunction
 
 function! GetPosFromOffset(offset)
-    "normalize esprima byte count for Vim (first byte is 1 in Vim)
+    "normalize byte count for Vim (first byte is 1 in Vim)
     let offset = a:offset + 1
     if offset < 0
         call Warn('offset cannot be less than 0: ' . string(offset))
@@ -88,7 +94,7 @@ function! HighlightRange(higroup, start, end, level)
 
     let s:region_count = s:region_count + 1
     let group_name = group  . s:region_count
-    let cmd = "syn region ". group_name  . " start='\\%" . startpos[0] ."l\\%". startpos[1] ."c' end='\\%" . endpos[0] . "l\\%" . endpos[1] . "c' contains=ALL"
+    let cmd = "syn region ". group_name  . " start='\\%" . startpos[0] ."l\\%". startpos[1] ."c' end='\\%" . endpos[0] . "l\\%" . endpos[1] . "c' contains=ALL fold"
     "echom cmd
     exe cmd
     exe 'hi link ' . group_name . ' ' . 'JSCC_Level_' . a:level
@@ -99,18 +105,23 @@ endfunction
 
 let s:jscc_highlight_groups_defined = 0
 
-"define highlight groups dynamically
-function! JSCC_DefineHighlightGroups()
+function! JSCC_DefineCommentSyntaxGroups()
 
-    colors js_context_colors
-
-    "define JavaScript comments syntax
+    "define JavaScript comments syntax -- all syntax is cleared when
+    "colorizing is done, so they must be redefined
     syntax keyword javaScriptCommentTodo    TODO FIXME XXX TBD contained
     syntax region  javaScriptLineComment    start=+\/\/+ end=+$+ keepend contains=javaScriptCommentTodo
     syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo fold
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
-    let s:jscc_highlight_groups_defined = 0
+endfunction
+
+"define highlight groups dynamically
+function! JSCC_DefineHighlightGroups()
+
+    colors js_context_colors
+
+    let s:jscc_highlight_groups_defined = 1
 endfunction
 
 
@@ -119,6 +130,10 @@ function! JSCC_Colorize()
     let s:region_count = 0
 
     syntax clear
+
+    if !g:js_context_colors_colorize_comments
+        call JSCC_DefineCommentSyntaxGroups()
+    endif
 
     if !s:jscc_highlight_groups_defined
         call JSCC_DefineHighlightGroups()
@@ -201,8 +216,11 @@ function! JSCC_Enable()
         call JSCC_DefineHighlightGroups()
     endif
 
-    "if < vim 7.4 TextChanged,TextChangedI events are not
-    "available and will result in error E216
+    if g:js_context_colors_fold
+        setlocal foldmethod=syntax
+        exe "setlocal foldlevel=" . g:js_context_colors_foldlevel
+    endif
+
     try
         "Note: currently TextChangedI does not take effect until after InsertMode is
         "exited, thus it is similar to InsertLeave.
@@ -211,6 +229,8 @@ function! JSCC_Enable()
             au! TextChangedI,TextChanged <buffer> :JSContextColor
         augroup END
 
+    "if < vim 7.4 TextChanged,TextChangedI events are not
+    "available and will result in error E216
     catch /^Vim\%((\a\+)\)\=:E216/
 
             "use different events to trigger update in Vim < 7.4
@@ -226,10 +246,15 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
+
     augroup JSContextColorAug
         au!
     augroup END
+
     syntax enable
+
+    exe "setlocal foldmethod " . s:orig_foldmethod
+
     let s:jscc_highlight_groups_defined = 0
 endfunction
 

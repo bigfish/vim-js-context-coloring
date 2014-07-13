@@ -23,8 +23,6 @@ if g:js_context_colors_enabled
 
     setlocal iskeyword+=$
 
-    syntax sync fromstart
-
     call JSCC_Enable()
 
     "set syntax to javascript so another syntax for javascript isn't loaded
