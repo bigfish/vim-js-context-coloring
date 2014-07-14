@@ -19,7 +19,7 @@ process.stdin.on('end', function() {
 
         var walker = new UglifyJS.TreeWalker(function(node){
 
-                var level;
+                var level, def, scope;
 
                 if (node instanceof UglifyJS.AST_Scope) {
 
@@ -30,7 +30,15 @@ process.stdin.on('end', function() {
                                 node.enclosed.forEach(function(v) {
                                         enclosed[v.name] = v.scope.level
                                         });
-                                scopes.push([node.level, node.start.pos, node.end.endpos, enclosed]);
+
+                                scope = [node.level, node.start.pos, node.end.endpos, enclosed];
+
+                                //add named function definitions
+                                if (node instanceof UglifyJS.AST_Defun) {
+                                     scope.push(node.name.name);//] = node.parent_scope.level;
+                                }
+
+                                scopes.push(scope);
                         }
 
 

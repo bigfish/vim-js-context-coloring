@@ -8,9 +8,13 @@ let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
 
+syntax case match
+
 let s:orig_foldmethod=&foldmethod
 
 if !exists('g:js_context_colors_enabled')
+
+
     let g:js_context_colors_enabled = 1
 endif
 
@@ -28,6 +32,10 @@ endif
 
 if !exists('g:js_context_colors_foldlevel')
     let g:js_context_colors_foldlevel = 9
+endif
+
+if !exists('g:js_context_colors_highlight_function_names')
+    let g:js_context_colors_highlight_function_names = 1
 endif
 
 if !exists('g:js_context_colors_show_error_message')
@@ -97,8 +105,12 @@ function! JSCC_DefineSyntaxGroups()
     syntax region  javaScriptLineComment    start=+^\s*\/\/+ skip=+\n\s*\/\/+ end=+$+ keepend contains=javaScriptCommentTodo fold
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
-    syntax region  javaScriptStringD        start=+"+  skip=+\\\\\|\\$"+  end=+"+
-    syntax region  javaScriptStringS        start=+'+  skip=+\\\\\|\\$'+  end=+'+
+    syntax cluster jsComment contains=javaScriptComment,javaScriptLineComment
+
+    syntax region  javaScriptStringD        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend transparent
+    syntax region  javaScriptStringS        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend transparent
+
+    syntax cluster jsString contains=javaScriptStringD,javaScriptStringS
 endfunction
 
 "define highlight groups dynamically
@@ -115,6 +127,8 @@ function! JSCC_Colorize()
     let s:region_count = 0
 
     syntax clear
+
+    let s:scope_level_clusters = {}
 
     if !g:js_context_colors_colorize_comments
         call JSCC_DefineSyntaxGroups()
@@ -162,25 +176,63 @@ function! JSCC_Colorize()
             let group_name = 'Level' . scope[0]
             let level = scope[0]
 
+            let enclosed = scope[3]
+            let enclosed_groups = []
+
+            "create unique scope syntax group name
             let s:region_count = s:region_count + 1
             let scope_group = group_name . s:region_count
 
-            let cmd = "syn region ". scope_group . " start='\\%" . start_pos[0] ."l\\%". start_pos[1] ."c' end='\\%" . end_pos[0] . "l\\%" . end_pos[1] . "c' contains=ALL fold"
-            "echom cmd
+            "create a scope level cluster or add scope to existing one
+            let scope_cluster = 'ScopeLevelCluster_' . level
+
+            if has_key(s:scope_level_clusters, scope_cluster)
+                exe 'syntax cluster ' . scope_cluster .' add=' . scope_group
+            else
+                exe 'syntax cluster ScopeLevelCluster_' . level . ' contains=' . scope_group
+                let s:scope_level_clusters[scope_cluster] = 1
+            endif
+
+            "handle vars
+            for var in keys(enclosed)
+
+                let var_level = enclosed[var]
+
+                if var_level < level
+                    let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
+                    exe "syn match ". var_syntax_group . ' /\<' . var . "\\>/ display contained containedin=" . scope_group
+                    exe 'hi link ' . var_syntax_group . ' ' . 'JSCC_Level_' . var_level
+                    call add(enclosed_groups, var_syntax_group)
+                endif
+
+            endfor
+
+            if g:js_context_colors_highlight_function_names
+                "get the function name if it exists
+                if len(scope) == 5
+                    let fname = scope[4]
+                    "function names are always exported into their parent scope
+                    let var_level = level - 1
+                    let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(fname, '$', 'S')
+                    exe "syn match ". var_syntax_group . ' /\<' . fname . "\\>/ display contained containedin=" . scope_group
+                    exe 'hi link ' . var_syntax_group . ' ' . 'JSCC_Level_' . var_level
+                    call add(enclosed_groups, var_syntax_group)
+                endif
+            endif
+
+            let contains = "contains=@jsComment,@jsString,@ScopeLevelCluster_" . (level + 1)
+
+            if len(enclosed_groups)
+                let contains .= ',' . join(enclosed_groups, ',')
+            endif
+
+            let cmd = "syn region ". scope_group . " start='\\%" . start_pos[0] ."l\\%". start_pos[1] .
+                        \"c' end='\\%" . end_pos[0] . "l\\%" . end_pos[1] .
+                        \"c' " . contains . " fold"
             exe cmd
+
             exe 'hi link ' . scope_group . ' ' . 'JSCC_Level_' . level
 
-            let enclosed = scope[3]
-
-            for var in keys(enclosed)
-                let var_level = enclosed[var]
-                "ignore vars which are contained in deeper scopes
-                "-- they will be defined with those scopes
-                if var_level < level
-                    let cmd = "syn keyword ". 'JSCC_Level_' . var_level . ' ' . var . " display contained containedin=" . scope_group
-                    exe cmd
-                endif
-            endfor
         endfor
 
     catch
