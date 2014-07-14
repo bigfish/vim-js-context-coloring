@@ -46,6 +46,8 @@ if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
 
+let s:max_levels = 10
+
 "parse functions
 function! Strip(input_string)
     return substitute(a:input_string, '^\s*\(.\{-}\)\s*$', '\1', '')
@@ -106,11 +108,15 @@ function! JSCC_DefineSyntaxGroups()
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
     syntax cluster jsComment contains=javaScriptComment,javaScriptLineComment
+    
+    
+    for lev in range(s:max_levels)
+        exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
+        exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
+        exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
+        exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
+    endfor
 
-    syntax region  javaScriptStringD        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend transparent
-    syntax region  javaScriptStringS        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend transparent
-
-    syntax cluster jsString contains=javaScriptStringD,javaScriptStringS
 endfunction
 
 "define highlight groups dynamically
@@ -200,8 +206,8 @@ function! JSCC_Colorize()
 
                 if var_level < level
                     let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
-                    exe "syn match ". var_syntax_group . ' /\<' . var . "\\>/ display contained containedin=" . scope_group
-                    exe 'hi link ' . var_syntax_group . ' ' . 'JSCC_Level_' . var_level
+                    exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
+                    exe 'hi link ' . var_syntax_group . ' JSCC_Level_' . var_level
                     call add(enclosed_groups, var_syntax_group)
                 endif
 
@@ -214,13 +220,13 @@ function! JSCC_Colorize()
                     "function names are always exported into their parent scope
                     let var_level = level - 1
                     let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(fname, '$', 'S')
-                    exe "syn match ". var_syntax_group . ' /\<' . fname . "\\>/ display contained containedin=" . scope_group
+                    exe "syn match ". var_syntax_group . ' /\<' . fname . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
                     exe 'hi link ' . var_syntax_group . ' ' . 'JSCC_Level_' . var_level
                     call add(enclosed_groups, var_syntax_group)
                 endif
             endif
 
-            let contains = "contains=@jsComment,@jsString,@ScopeLevelCluster_" . (level + 1)
+            let contains = "contains=@jsComment,javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
 
             if len(enclosed_groups)
                 let contains .= ',' . join(enclosed_groups, ',')
