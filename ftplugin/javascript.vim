@@ -10,11 +10,7 @@ let s:region_count = 1
 
 syntax case match
 
-let s:orig_foldmethod=&foldmethod
-
 if !exists('g:js_context_colors_enabled')
-
-
     let g:js_context_colors_enabled = 1
 endif
 
@@ -301,8 +297,6 @@ function! JSCC_Disable()
     augroup END
 
     syntax enable
-
-    exe "setlocal foldmethod " . s:orig_foldmethod
 
     let s:jscc_highlight_groups_defined = 0
 endfunction
