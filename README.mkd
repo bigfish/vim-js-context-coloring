@@ -89,54 +89,23 @@ update as you type.
 
 ###Colors
 
-To change the colors used, set the `g:js_context_colors` variable to a list of colors, eg:
-
-	let g:js_context_colors = [ 252, 10, 11, 172, 1, 161, 63 ]
-
-Colors may be numbers (for terminal colors) or strings which define hexadecimal colors (for the GUI) 
-defined as '#rrggbb' where rr, gg, bb are the red, green, and blue values in hexadecimal. The plugin
-will translate terminal colors to hex when the gui is found to be running. You may also use color names
-such as: 'Red', 'Green', 'Cyan', 'Magenta', 'Blue' and others, see `:h ctermfg' for more. The GUI may
-support additional color names, eg. 'Violet', which will work in GUI but not in the terminal. Both hex
-colors and color names are case-insensitive. You may combine color numbers and names in the same list.
-
-You may also specify colors as a Dictionary.. see next section for details.
-
-The first color is the first level (global), the second is level 2 (top level
-functions), the third is functions inside top-level functions...etc. The only 
-values currently supported are terminal color numbers.
-
-NB: Ensure that your terminal supports 256 colors before using colors
-outside the default 16 terminal colors (0 - 15). Eg. these are the basic 16 terminal colors
-on Ubuntu (Xterm):
-
-0:black, 1:red, 2:green, 3:yellow, 4:blue, 5:magenta, 6:cyan, 7:light gray
-
-The colors 8-15 are 'bold' versions of the above:
-
-8:dark gray, 9:bright red, 10:bright green, 11: bright yellow, 12: bright blue,
-13: bright magenta, 14:bright cyan, 15:white
-
 The default colors for JavaScript scope levels are:
 
 1:white, 2:green, 3: yellow 4:blue, 5:red, 6:cyan, 7:grey.
 
+The highlighting is now handled by a colorscheme file, in standard vim colorscheme format.
+If you're upgrading from a previous version of the plugin (<= 0.6), you will need to 
+reconfigure your colors by copying the 'jscc_colors.vim' colorscheme file from the
+plugin's /colors directory, to your VIMRUNTIME/colors directory (create if necessary). 
+On unix this will be ~/.vim/colors.  Make sure the name is still the same.
+Then you can make modifications to the highlight groups in the file as you wish.
+See ':help highlight-args' or look at other colorschemes for guidance. 
 You may add additional levels if you wish. 
 
 You may use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
 
 Note that the color changes will not take effect immediately. To update the colors, you
 can use the `:JSContextColorUpdate` command.
-
-####Background Colors using Dictionary Color Definition
-
-You may specify a color as a dictionary with the following keys: ctermfg, ctermbg, guifg, guibg. These
-take the same values as described above, except that hex colors may not be given for cterm options, and
-terminal color numbers may *not* be given for the gui options. You do not have to specify all the options,
-if not specified they will be set to the default values. So if you wanted to, you could specify a background
-of green for the second scope as follows:
-
-    let g:js_context_colors = [ 252, { 'ctermbg': 'green', 'guibg': 'green'}, 11, 172, 1, 161, 63 ]
 
 ###256 Color Support
 
@@ -175,29 +144,6 @@ Or to use the comment syntax highlighting from your colorscheme:
 
 This will only take effect if the `g:js_context_colors_colorize_comments` option
 is not set to 1.
-
-###Insert Mode Behaviour
-
-Now does coloring in insert mode! However if you don't like this behaviour (it is 
-more likely to fail as code being written is more likely to be syntactally invalid)
-the jus set the option to false:
-
-	let g:js_context_colors_insertmode = 0
-
-Then it will behave as previous versions of the plugin.
-
-###Invalid Syntax Behaviour
-
-When the syntax is invalid, the plugin cannot provide highlighting.
-This can be used to detect syntax errors! However, if you want to
-ignore these failures, and just preserve the last highlighting,
-you can set this option to 0:
-
-	let g:js_context_colors_no_highlight_on_syntax_error = 0
-
-It will keep the last successful highlighting in place. However it will
-not be accurate if code is being changed, until it is successfully parsed again,
-so you may see incorrect highlighting temporarily.
 
 ###Error Message
 When the plugin fails to get a valid response from the parser script, it
