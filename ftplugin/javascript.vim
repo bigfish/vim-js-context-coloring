@@ -153,8 +153,21 @@ function! JSCC_Colorize()
         endif
         let linenum += 1
     endfor
+    "fix offset errors caused by windows line endings
+    "since 'buflines' does NOT return the line endings
+    "we need to replace them for unix/mac file formats
+    "and for windows we replace them with a space and \n
+    "since \r does not work in node on linux, just replacing
+    "with a space will at least correct the offsets
+    if &ff == 'unix' || &ff == 'mac'
+        let buftext = join(buflines, "\n")
+    elseif &ff == 'dos'
+        let buftext = join(buflines, " \n")
+    else
+        echom 'unknown file format' . &ff
+        let buftext = join(buflines, "\n")
+    endif
 
-    let buftext = join(buflines, "\n")
     "noop if empty string
     if Strip(buftext) == ''
         return
