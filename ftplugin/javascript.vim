@@ -280,14 +280,12 @@ function! JSCC_Enable()
     endif
 
     try
-        "Note: currently TextChangedI does not take effect until after InsertMode is
-        "exited, thus it is similar to InsertLeave.
         augroup JSContextColorAug
             au!
-            au! TextChangedI,TextChanged <buffer> :JSContextColor
+            au! TextChanged <buffer> :JSContextColor
         augroup END
 
-    "if < vim 7.4 TextChanged,TextChangedI events are not
+    "if < vim 7.4 TextChanged events are not
     "available and will result in error E216
     catch /^Vim\%((\a\+)\)\=:E216/
 
