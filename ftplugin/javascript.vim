@@ -282,7 +282,7 @@ function! JSCC_Enable()
     try
         augroup JSContextColorAug
             au!
-            au! TextChanged <buffer> :JSContextColor
+            au! InsertLeave,TextChanged <buffer> :JSContextColor
         augroup END
 
     "if < vim 7.4 TextChanged events are not
