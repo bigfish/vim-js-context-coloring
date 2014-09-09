@@ -3,7 +3,13 @@
 "Author: David Wilhelm <dewilhelm@gmail.com>
 "
 "Note: highlights function scopes in JavaScript
-"use XtermColorTable plugin to see what colors are available
+"
+" Only do this when not done yet for this buffer
+if exists("b:did_ftplugin")
+  finish
+endif
+let b:did_ftplugin = 1
+
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
@@ -125,6 +131,11 @@ endfunction
 
 
 function! JSCC_Colorize()
+
+    "bail if not a js filetype
+    if &ft != 'javascript'
+        return
+    endif
 
     let s:region_count = 0
 
