@@ -5,10 +5,10 @@
 "Note: highlights function scopes in JavaScript
 "
 " Only do this when not done yet for this buffer
-if exists("b:did_ftplugin")
+if exists("b:did_jscc_ftplugin")
   finish
 endif
-let b:did_ftplugin = 1
+let b:did_jscc_ftplugin = 1
 
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
