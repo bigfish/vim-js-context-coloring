@@ -21,6 +21,22 @@ process.stdin.on('end', function() {
 
                 var level, def, scope;
 
+                // AST_Accessor inherits AST_Scope but does not have start/end
+                // these must be obtained from AST_ObjectSetter/Getter property node
+                // which has the accessor function as its value. So to fix the issue
+                // just set the start and end manually using the Getter/Setter's values
+
+                if ( node instanceof UglifyJS.AST_ObjectGetter || node instanceof UglifyJS.AST_ObjectSetter) {
+
+                        //only start highlighting after get / set keyword
+                        node.value.start = {
+                                pos: node.start.pos + 4
+                        };
+                        node.value.end = {
+                                endpos: node.end.endpos
+                        };
+                }
+
                 if (node instanceof UglifyJS.AST_Scope) {
 
                         //annotate Scope Nodes with level info
