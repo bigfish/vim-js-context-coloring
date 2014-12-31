@@ -1,0 +1,3 @@
+[submodule "UglifyJS2"]
+	path = UglifyJS2
+	url = https://github.com/bigfish/UglifyJS2.git

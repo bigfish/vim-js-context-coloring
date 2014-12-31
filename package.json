@@ -16,6 +16,6 @@
   "readmeFilename": "README.mkd",
   "gitHead": "617951e1806cf83d3f324687e0a2a0bb28eca47b",
   "dependencies": {
-    "uglify-js": "~2.4.15"
+    "acorn-jsx": "~0.9.1-7"
   }
 }
