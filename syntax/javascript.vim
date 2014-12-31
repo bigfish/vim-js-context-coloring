@@ -10,9 +10,10 @@
 " The actual syntax definitions are done dynamically
 " in the ftplugin/javascript.vim file.
 
-syntax clear
 
-if exists('g:js_context_colors_enabled') && g:js_context_colors_enabled
+if &filetype == 'javascript' && exists('g:js_context_colors_enabled') && g:js_context_colors_enabled
+
+    syntax clear
 
     setlocal iskeyword+=$
 
