@@ -2,7 +2,8 @@
 
 /*jshint node:true, strict:false*/
 var input_js = '';
-var UglifyJS = require("../node_modules/uglify-js/tools/node.js");
+var UglifyJS = require("../UglifyJS2/tools/node.js");
+var acorn = require("acorn-jsx");
 var scopes = [];
 
 process.stdin.resume();
@@ -13,7 +14,12 @@ process.stdin.on('data', function(chunk) {
 });
 
 process.stdin.on('end', function() {
-        var toplevel = UglifyJS.parse(input_js);
+
+        //use acorn-jsx parser as it handles JSX
+        var moz_ast = acorn.parse(input_js);
+
+        var toplevel = UglifyJS.AST_Node.from_mozilla_ast(moz_ast);
+
         toplevel.figure_out_scope();
 
 

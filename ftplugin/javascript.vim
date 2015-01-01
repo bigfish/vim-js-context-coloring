@@ -10,7 +10,19 @@ if exists("b:did_jscc_ftplugin")
 endif
 let b:did_jscc_ftplugin = 1
 
-let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
+"detect jsx
+let s:jsx_pragma_pattern = '\%^\_s*\/\*\*\%(\_.\%(\*\/\)\@!\)*@jsx\_.\{-}\*\/'
+let s:jsx_pragma_found = search(s:jsx_pragma_pattern, 'npw')
+
+let g:jscc_is_jsx = 0
+
+"use jsx compatible parser when jsx is detected
+if expand('%:e') == 'jsx' || s:jsx_pragma_found
+   let g:jscc_is_jsx = 1
+   let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-jsx-cli'
+else
+    let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
+endif
 
 let s:region_count = 1
 
@@ -110,8 +122,8 @@ function! JSCC_DefineSyntaxGroups()
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
     syntax cluster jsComment contains=javaScriptComment,javaScriptLineComment
-    
-    
+
+
     for lev in range(s:max_levels)
         exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
         exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
@@ -341,8 +353,6 @@ command! JSContextColorToggle call JSCC_Toggle()
 
 command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
-"always create color highlight groups in case of direct calls to :JSContextColor
-:JSContextColorUpdate
 if g:js_context_colors_usemaps
     if !hasmapto('<Plug>JSContextColor')
         "mnemonic (h)ighlight
