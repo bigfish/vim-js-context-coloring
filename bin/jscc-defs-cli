@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+/*jshint node:true, strict:false*/
+var input_js = '';
+var defs = require("../defs/defs-main.js");
+var scopes = [];
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('data', function(chunk) {
+    input_js += chunk;
+});
+
+process.stdin.on('end', function() {
+
+        var ast = require("esprima").parse(input_js, {loc: true, range: true});
+        var res = defs(ast, {ast:true, scopes:true});
+        var enclosed = {};
+
+        //walk the tree of scopes
+        function getRanges(node, level) {
+                var decls = node.$scope.decls.keys();
+                //convert to name: level
+                //console.log(node.$scope.decls.keys());
+                decls.forEach(function (d) {
+                        enclosed[d] = level;
+                });
+                
+                scopes.push([level, node.range[0], node.range[1], enclosed ])
+
+                //console.log(node.$scope.children);
+                node.$scope.children.forEach(function (s) {
+                        getRanges(s.node,level+1);
+                });
+        }
+
+        //console.log(res.ast);
+        
+        getRanges(res.ast, 0);
+        
+        process.stdout.write(JSON.stringify({
+                scopes: scopes
+        }));
+});

@@ -10,7 +10,7 @@ if exists("b:did_jscc_ftplugin")
 endif
 let b:did_jscc_ftplugin = 1
 
-let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
+let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-defs-cli'
 
 let s:region_count = 1
 
@@ -187,7 +187,7 @@ function! JSCC_Colorize()
     "ignore errors from shell command to prevent distracting user
     "syntax errors should be caught by a lint program
     try
-        let colordata_result = system(s:jscc, buftext)
+        let colordata_result = system("babel-node " . s:jscc, buftext)
 
         let colordata = eval(colordata_result)
 
