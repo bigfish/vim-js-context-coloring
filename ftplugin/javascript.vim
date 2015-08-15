@@ -10,7 +10,8 @@ if exists("b:did_jscc_ftplugin")
 endif
 let b:did_jscc_ftplugin = 1
 
-let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
+let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-escope-cli'
+"let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
 
@@ -191,6 +192,7 @@ function! JSCC_Colorize()
 
         let colordata = eval(colordata_result)
 
+
         let scopes = colordata.scopes
         "let symbols = colordata.symbols
 
@@ -273,6 +275,9 @@ function! JSCC_Colorize()
 
     endtry
 
+        if g:js_context_colors_debug
+            echom colordata_result
+        endif
     "ensure syntax highlighting is fully applied
     syntax sync fromstart
 

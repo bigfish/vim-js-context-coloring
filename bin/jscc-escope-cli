@@ -4,7 +4,6 @@
 var input_js = '';
 var escope = require('escope');
 var esprima = require('esprima');
-var estraverse = require('estraverse');
 
 var scopes = [];
 
@@ -16,107 +15,48 @@ process.stdin.on('data', function(chunk) {
 });
 
 process.stdin.on('end', function() {
-        var ast = esprima.parse(input_js, { range: true });
-        var scopeManager = escope.analyze(ast, {ecmaVersion: 6}); 
-        var toplevel = scopeManager.acquire(ast);
-        var currentScope;
+    var ast = esprima.parse(input_js, {
+        range: true
+    });
+    var scopeManager = escope.analyze(ast, {
+            optimistic: true,
+            ignoreEval: true,
+            ecmaVersion: 6
+    }); 
+    var toplevel = scopeManager.acquire(ast);
 
-        function setLevel(scope, level) {
+    //console.log(toplevel);
+
+    //an array of arrays of variables
+    //indexed by level they are defined in
+    var variables = [];
+
+    function setLevel(scope, level) {
+
+            var enclosed = {};
+
             scope.level = level;
+
+            scope.through.forEach(function (ref) {
+                    if (ref.resolved) {
+                        enclosed[ref.identifier.name] = ref.resolved.scope.level;
+                    } else {
+                        enclosed[ref.identifier.name] = 0;
+                    }
+            });           
+            scopes.push([level, scope.block.range[0], scope.block.range[1], enclosed]);
+
+            
             if (scope.childScopes.length) {
-                scope.childScopes.forEach(function (s) {
-                    setLevel(s, level + 1);
-                });
+                    scope.childScopes.forEach(function (s) {
+                            setLevel(s, level + 1);
+                    });
             }
-        }
 
-estraverse.traverse(ast, {
-    enter: function(node, parent) {
-        var enclosed = {};
-
-        if (/Program/.test(node.type)) {
-
-            currentScope = scopeManager.acquire(node);
-            setLevel(currentScope, 0);
-
-            scopes.push([currentScope.level, node.range[0], node.range[1], enclosed]);
-
-        }
-
-        if (/Function/.test(node.type)) {
-
-            currentScope = scopeManager.acquire(node);  // get current function scope
-            //node.level = parent.level + 1;
-            /*var enclosed = {};
-              node.enclosed.forEach(function(v) {
-              enclosed[v.name] = v.scope.level
-              });*/
-
-            //scope = [node.level, node.start.pos, node.end.endpos, enclosed];
-            //scope = [node.level, node.loc.start, node.loc.end];
-
-            //add named function definitions
-            /*if (node instanceof UglifyJS.AST_Defun) {
-              scope.push(node.name.name);//] = node.parent_scope.level;
-              }*/
-
-            scopes.push([currentScope.level, node.range[0], node.range[1], enclosed]);
-        }
-    },
-
-    leave: function(node, parent) {
-        if (/Function/.test(node.type)) {
-            currentScope = currentScope.upper;  // set to parent scope
-        }
-
-        // do stuff
     }
-});     
-        /*var walker = new UglifyJS.TreeWalker(function(node){
 
-                var level, def, scope;
+    setLevel(toplevel, 0)
 
-                // AST_Accessor inherits AST_Scope but does not have start/end
-                // these must be obtained from AST_ObjectSetter/Getter property node
-                // which has the accessor function as its value. So to fix the issue
-                // just set the start and end manually using the Getter/Setter's values
-
-                if ( node instanceof UglifyJS.AST_ObjectGetter || node instanceof UglifyJS.AST_ObjectSetter) {
-
-                        //only start highlighting after get / set keyword
-                        node.value.start = {
-                                pos: node.start.pos + 4
-                        };
-                        node.value.end = {
-                                endpos: node.end.endpos
-                        };
-                }
-
-                if (node instanceof UglifyJS.AST_Scope) {
-
-                        //annotate Scope Nodes with level info
-                        if (node.level === undefined) {
-                                node.level = node.parent_scope ? node.parent_scope.level + 1 : 0;
-                                var enclosed = {};
-                                node.enclosed.forEach(function(v) {
-                                        enclosed[v.name] = v.scope.level
-                                        });
-
-                                scope = [node.level, node.start.pos, node.end.endpos, enclosed];
-
-                                //add named function definitions
-                                if (node instanceof UglifyJS.AST_Defun) {
-                                     scope.push(node.name.name);//] = node.parent_scope.level;
-                                }
-
-                                scopes.push(scope);
-                        }
-
-
-                }
-        });
-        toplevel.walk(walker);
-*/
         process.stdout.write(JSON.stringify({
                 scopes: scopes
         }));
