@@ -11,7 +11,6 @@ endif
 let b:did_jscc_ftplugin = 1
 
 let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-escope-cli'
-"let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-cli'
 
 let s:region_count = 1
 

@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+//legacy cli for es5 only
+
+/*jshint node:true, strict:false*/
+var input_js = '';
+var UglifyJS = require("../node_modules/uglify-js/tools/node.js");
+var scopes = [];
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('data', function(chunk) {
+    input_js += chunk;
+});
+
+process.stdin.on('end', function() {
+        var toplevel = UglifyJS.parse(input_js);
+        toplevel.figure_out_scope();
+
+
+        var walker = new UglifyJS.TreeWalker(function(node){
+
+                var level, def, scope;
+
+                // AST_Accessor inherits AST_Scope but does not have start/end
+                // these must be obtained from AST_ObjectSetter/Getter property node
+                // which has the accessor function as its value. So to fix the issue
+                // just set the start and end manually using the Getter/Setter's values
+
+                if ( node instanceof UglifyJS.AST_ObjectGetter || node instanceof UglifyJS.AST_ObjectSetter) {
+
+                        //only start highlighting after get / set keyword
+                        node.value.start = {
+                                pos: node.start.pos + 4
+                        };
+                        node.value.end = {
+                                endpos: node.end.endpos
+                        };
+                }
+
+                if (node instanceof UglifyJS.AST_Scope) {
+
+                        //annotate Scope Nodes with level info
+                        if (node.level === undefined) {
+                                node.level = node.parent_scope ? node.parent_scope.level + 1 : 0;
+                                var enclosed = {};
+                                node.enclosed.forEach(function(v) {
+                                        enclosed[v.name] = v.scope.level
+                                        });
+
+                                scope = [node.level, node.start.pos, node.end.endpos, enclosed];
+
+                                //add named function definitions
+                                if (node instanceof UglifyJS.AST_Defun) {
+                                     scope.push(node.name.name);//] = node.parent_scope.level;
+                                }
+
+                                scopes.push(scope);
+                        }
+
+
+                }
+        });
+        toplevel.walk(walker);
+
+        process.stdout.write(JSON.stringify({
+                scopes: scopes
+        }));
+});
