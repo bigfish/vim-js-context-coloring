@@ -45,7 +45,8 @@ process.stdin.on('end', function() {
     if (jsx) {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
-            ranges: true
+            ranges: true,
+            plugins: { jsx: true }
         });
 
     } else {

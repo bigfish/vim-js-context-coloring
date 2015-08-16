@@ -10,12 +10,40 @@ if exists("b:did_jscc_ftplugin")
 endif
 let b:did_jscc_ftplugin = 1
 
-let s:jscc = expand('<sfile>:p:h').'/../bin/jscc-escope-cli'
+let s:cli_cmd = 'jscc-cli'
+
+" check options to send as CLI params
+if !exists('g:js_context_colors_jsx')
+    let g:js_context_colors_jsx = 0
+endif
+
+"however, if current buffer file extension is .jsx
+"turn on jsx flag
+let b:file_ext = expand('%:e')
+if b:file_ext == "jsx"
+    let g:js_context_colors_jsx = 1
+endif
+
+if g:js_context_colors_jsx 
+    let s:cli_cmd .= ' --jsx'
+endif
+
+if !exists('g:js_context_colors_block_scope')
+    let g:js_context_colors_block_scope = 0
+endif
+
+if g:js_context_colors_block_scope 
+    let s:cli_cmd .= ' --block-scope'
+endif
+
+let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
+     
 
 let s:region_count = 1
 
 syntax case match
 
+"set default options if no provided value
 if !exists('g:js_context_colors_enabled')
     let g:js_context_colors_enabled = 1
 endif
@@ -281,7 +309,6 @@ function! JSCC_Colorize()
     syntax sync fromstart
 
 endfunction
-
 
 function! JSCC_Enable()
 
