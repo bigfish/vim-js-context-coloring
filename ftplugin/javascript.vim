@@ -36,6 +36,14 @@ if g:js_context_colors_block_scope
     let s:cli_cmd .= ' --block-scope'
 endif
 
+if !exists('g:js_context_colors_block_scope_with_let')
+    let g:js_context_colors_block_scope_with_let = 0
+endif
+
+if g:js_context_colors_block_scope_with_let 
+    let s:cli_cmd .= ' --block-scope-with-let'
+endif
+
 let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
      
 
