@@ -17,6 +17,7 @@
   "gitHead": "617951e1806cf83d3f324687e0a2a0bb28eca47b",
   "dependencies": {
     "escope": "~3.2.0",
-    "esprima": "~2.5.0"
+    "esprima": "~2.5.0",
+    "acorn-jsx": "~2.0.0"
   }
 }
