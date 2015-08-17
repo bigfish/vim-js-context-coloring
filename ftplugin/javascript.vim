@@ -165,6 +165,7 @@ function! JSCC_DefineSyntaxGroups()
         exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
         exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
         exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
+
         exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
         exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
         exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
@@ -284,7 +285,7 @@ function! JSCC_Colorize()
                         let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
                     endif
 
-                    exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
+                    exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group . ",javaScriptTemplate_" . level
 
                     if var_level != -1
                         exe 'hi link ' . var_syntax_group . ' JSCC_Level_' . var_level
