@@ -128,8 +128,8 @@ enable.
 
                                                 *g:js_context_colors_jsx*
 
-Tolerates React/JSX syntax. This is off by default, set to 1 to enable.
-
+Tolerates React/JSX syntax. This is off by default, set to 1 to enable.  If the file extension
+is .jsx this will be automatically turned on.
                                                 *g:js_context_colors_es5*
 
 Only support ES5 syntax. By default the plugin will now highlight ES6 syntax as well as

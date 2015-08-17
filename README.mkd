@@ -177,7 +177,8 @@ If you only want to support ES5 syntax, you can set the `g:js_context_colors_es5
 
 ### JSX support
  
-Set the `g:js_context_colors_jsx` option to 1 to support JSX (and ES6).
+Set the `g:js_context_colors_jsx` option to 1 to support JSX (and ES6). If the file extension
+is .jsx this will be automatically turned on.
 
 ### Folding
 
