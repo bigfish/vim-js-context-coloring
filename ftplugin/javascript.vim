@@ -156,8 +156,10 @@ function! JSCC_DefineSyntaxGroups()
     for lev in range(s:max_levels)
         exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
         exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
+        exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
         exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
         exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
+        exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
     endfor
 
 endfunction
@@ -285,7 +287,7 @@ function! JSCC_Colorize()
 
             endfor
 
-            let contains = "contains=@jsComment,javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
+            let contains = "contains=@jsComment,javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptTemplate_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
 
             if len(enclosed_groups)
                 let contains .= ',' . join(enclosed_groups, ',')
