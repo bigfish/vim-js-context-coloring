@@ -52,8 +52,16 @@ if g:js_context_colors_block_scope_with_let
     let s:cli_cmd .= ' --block-scope-with-let'
 endif
 
+"revert to old cli if es5 option is given
+if !exists('g:js_context_colors_es5')
+    let g:js_context_colors_es5 = 0
+endif
+
+if g:js_context_colors_es5
+    let s:cli_cmd = 'jscc-cli-legacy'
+endif
+
 let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
-     
 
 let s:region_count = 1
 
