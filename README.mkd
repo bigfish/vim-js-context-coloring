@@ -34,6 +34,13 @@ your choice. Here is a summary of the commands available:
     g:js_context_colors_colorize_comments
     g:js_context_colors_comment_higroup
     g:js_context_colors_debug
+    g:js_context_colors_highlight_function_names
+    g:js_context_colors_es5
+    g:js_context_colors_block_scope
+    g:js_context_colors_block_scope_with_let
+    g:js_context_colors_jsx
+    g:js_context_colors_fold
+    g:js_context_colors_folding
 
 ##Requirements
 
@@ -102,6 +109,11 @@ Then you can make modifications to the highlight groups in the file as you wish.
 See ':help highlight-args' or look at other colorschemes for guidance. 
 You may add additional levels if you wish. 
 
+The special syntax group 'JSCC_UndeclaredGlobal' targets undeclared global
+variables, in order to distinguish them from global variables which were
+declared in the current file. If you don't want to distinguish these, just set
+this group to the same highlighting as JSCC_Level_0.
+
 You may use the [XtermColorTable](http://www.vim.org/scripts/script.php?script_id=3412) plugin to see what colors are available
 
 Note that the color changes will not take effect immediately. To update the colors, you
@@ -144,6 +156,38 @@ Or to use the comment syntax highlighting from your colorscheme:
 
 This will only take effect if the `g:js_context_colors_colorize_comments` option
 is not set to 1.
+
+### Highlighting Function names
+
+Setting the `g:js_context_colors_highlight_function_names` option to 1 will
+highlight declared function names with the parent scope level color, to
+indicate that the name was exported to the container scope. 
+
+###ES6 Support
+
+The plugin now supports ES6 code. Arrow functions will be highlighted.
+If you also want to highlight block scopes, you can set the `g:js_context_colors_block_scope`
+option, but be aware this will also affect ES3/5 code if you open it. So you can 
+use the `g:js_context_colors_block_scope_with_let` option, to only highlight
+blocks with let variables.
+
+##ES5 only mode
+
+If you only want to support ES5 syntax, you can set the `g:js_context_colors_es5` option
+
+### JSX support
+ 
+Set the `g:js_context_colors_jsx` option to 1 to support JSX (and ES6).
+
+### Folding
+
+The foldmethod is set to syntax by default, so if you do 'zc' to close the current fold,
+it will fold the current function. ('zo' opens it again). If `g:js_context_colors_block_scope`
+is set, it will fold the current block. There is another option to automatically fold functions
+after a certain depth of nesting, which is 9 by default. The option that controls this is
+`g:js_context_colors_foldlevel`. Set to a lower number to fold sooner, or a higher to avoid folding 
+if you don't want auto folding. To not set foldmethod to syntax, and disable autofolding,
+set the `g:js_context_colors_foldlevel` to 0.
 
 ###Error Message
 When the plugin fails to get a valid response from the parser script, it

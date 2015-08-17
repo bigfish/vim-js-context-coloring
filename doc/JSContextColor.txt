@@ -33,6 +33,11 @@ sure the name is still the same. Then you can make modifications to the highligh
 colorschemes for guidance. The XtermColorTable plugin is also helpful for seeing
  the available colors and their codes.
 
+The special syntax group 'JSCC_UndeclaredGlobal' targets undeclared global
+variables, in order to distinguish them from global variables which were
+declared in the current file. If you don't want to distinguish these, just set
+this group to the same highlighting as JSCC_Level_0.
+
 If you change the colors, you need to call :JSContextColorUpdate
 
 Options
@@ -75,7 +80,7 @@ If you want this enable this behaviour, set the option to 1:
 
 This will highlight comments as the comment higroup (see next section). 
 
-<
+
 
                                                 *g:js_context_colors_usemaps*
 
@@ -102,6 +107,34 @@ But for debugging, it can be re-enabled with this option:
 
 If set to 1, this enables verbose debug output, eg. highlighting data is
 displayed.
+
+                                                *g:js_context_colors_block_scope*
+
+Highlight blocks as scope levels. Only really makes sense for ES6 code, but
+this will also affect ES5 code, so be aware of that. It will be ignored if
+the g:js_context_colors_es5 option is set (see below).
+
+                                                *g:js_context_colors_block_scope_with_let*
+
+Highlight blocks as scope levels, only if a 'let' variable was included in it.
+This allows smarter highlighting across ES5 and ES6, as only ES6 code will
+have let variables.
+
+                                                *g:js_context_colors_highlight_function_names*
+
+Highlight declared function names with the parent scope level color, to
+indicate that the name was exported to the container scope. Set to 1 to
+enable.
+
+                                                *g:js_context_colors_jsx*
+
+Tolerates React/JSX syntax. This is off by default, set to 1 to enable.
+
+                                                *g:js_context_colors_es5*
+
+Only support ES5 syntax. By default the plugin will now highlight ES6 syntax as well as
+ES5/ES3. This switches to the older CLI backend.
+>
 
 ==============================================================================
 Mapping
