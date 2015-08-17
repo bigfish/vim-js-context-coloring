@@ -40,6 +40,14 @@ if !exists('g:js_context_colors_block_scope_with_let')
     let g:js_context_colors_block_scope_with_let = 0
 endif
 
+if !exists('g:js_context_colors_highlight_function_names')
+    let g:js_context_colors_highlight_function_names = 0
+endif
+
+if g:js_context_colors_highlight_function_names
+    let s:cli_cmd .= ' --highlight-function-names'
+endif
+
 if g:js_context_colors_block_scope_with_let 
     let s:cli_cmd .= ' --block-scope-with-let'
 endif
@@ -72,9 +80,6 @@ if !exists('g:js_context_colors_foldlevel')
     let g:js_context_colors_foldlevel = 9
 endif
 
-if !exists('g:js_context_colors_highlight_function_names')
-    let g:js_context_colors_highlight_function_names = 1
-endif
 
 if !exists('g:js_context_colors_show_error_message')
     let g:js_context_colors_show_error_message = 0
@@ -262,26 +267,23 @@ function! JSCC_Colorize()
                 let var_level = enclosed[var]
 
                 if var_level < level
-                    let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
+
+                    if var_level == -1
+                        let var_syntax_group = 'JSCC_UndeclaredGlobal'
+                    else
+                        let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
+                    endif
+
                     exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
-                    exe 'hi link ' . var_syntax_group . ' JSCC_Level_' . var_level
+
+                    if var_level != -1
+                        exe 'hi link ' . var_syntax_group . ' JSCC_Level_' . var_level
+                    endif
+
                     call add(enclosed_groups, var_syntax_group)
                 endif
 
             endfor
-
-            if g:js_context_colors_highlight_function_names
-                "get the function name if it exists
-                if len(scope) == 5
-                    let fname = scope[4]
-                    "function names are always exported into their parent scope
-                    let var_level = level - 1
-                    let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(fname, '$', 'S')
-                    exe "syn match ". var_syntax_group . ' /\<' . fname . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
-                    exe 'hi link ' . var_syntax_group . ' ' . 'JSCC_Level_' . var_level
-                    call add(enclosed_groups, var_syntax_group)
-                endif
-            endif
 
             let contains = "contains=@jsComment,javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
 

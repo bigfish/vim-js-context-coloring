@@ -10,6 +10,7 @@
 
 "echom "JSCC: loading highlighting groups"
 
+hi JSCC_UndeclaredGlobal ctermfg=199 guifg=#FF0000
 hi JSCC_Level_0 ctermfg=15 guifg=#ffffff
 hi JSCC_Level_1 ctermfg=2 guifg=#008000
 hi JSCC_Level_2 ctermfg=3 guifg=#808000
