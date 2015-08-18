@@ -2,10 +2,15 @@
 :JSContextColorToggle	JSContextColor.txt	/*:JSContextColorToggle*
 :JSContextColorUpdate	JSContextColor.txt	/*:JSContextColorUpdate*
 JSContextColor	JSContextColor.txt	/*JSContextColor*
+g:js_context_colors_block_scope	JSContextColor.txt	/*g:js_context_colors_block_scope*
+g:js_context_colors_block_scope_with_let	JSContextColor.txt	/*g:js_context_colors_block_scope_with_let*
 g:js_context_colors_colorize_comments	JSContextColor.txt	/*g:js_context_colors_colorize_comments*
 g:js_context_colors_debug	JSContextColor.txt	/*g:js_context_colors_debug*
 g:js_context_colors_enabled	JSContextColor.txt	/*g:js_context_colors_enabled*
+g:js_context_colors_es5	JSContextColor.txt	/*g:js_context_colors_es5*
 g:js_context_colors_fold	JSContextColor.txt	/*g:js_context_colors_fold*
 g:js_context_colors_foldlevel	JSContextColor.txt	/*g:js_context_colors_foldlevel*
+g:js_context_colors_highlight_function_names	JSContextColor.txt	/*g:js_context_colors_highlight_function_names*
+g:js_context_colors_jsx	JSContextColor.txt	/*g:js_context_colors_jsx*
 g:js_context_colors_show_error_message	JSContextColor.txt	/*g:js_context_colors_show_error_message*
 g:js_context_colors_usemaps	JSContextColor.txt	/*g:js_context_colors_usemaps*

@@ -191,9 +191,8 @@ function! JSCC_DefineHighlightGroups()
     let s:jscc_highlight_groups_defined = 1
 endfunction
 
-
 function! JSCC_Colorize()
-
+    
     "bail if not a js filetype
     if &ft != 'javascript'
         return
@@ -365,7 +364,8 @@ function! JSCC_Enable()
 
     try
         augroup JSContextColorAug
-            au!
+            "remove if added previously, but only in this buffer
+            au! InsertLeave,TextChanged <buffer> 
             au! InsertLeave,TextChanged <buffer> :JSContextColor
         augroup END
 
@@ -375,7 +375,7 @@ function! JSCC_Enable()
 
             "use different events to trigger update in Vim < 7.4
             augroup JSContextColorAug
-                au!
+                au! InsertLeave <buffer> 
                 au! InsertLeave <buffer> :JSContextColor
             augroup END
 
@@ -386,10 +386,17 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
+    try 
+        augroup JSContextColorAug
+            au! InsertLeave,TextChanged <buffer>
+        augroup END
 
-    augroup JSContextColorAug
-        au!
-    augroup END
+    catch /^Vim\%((\a\+)\)\=:E216/
+
+        augroup JSContextColorAug
+            au! InsertLeave <buffer>
+        augroup END
+    endtry
 
     syntax enable
 
