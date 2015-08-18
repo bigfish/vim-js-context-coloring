@@ -166,9 +166,19 @@ function! JSCC_DefineSyntaxGroups()
         exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
         exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
 
+        if g:js_context_colors_jsx 
+            " Highlight JSX regions as XML; recursively match.
+            exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
+        endif
+
         exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
         exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
         exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
+
+        if g:js_context_colors_jsx 
+            exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
+        endif
+
     endfor
 
 endfunction
@@ -292,6 +302,11 @@ function! JSCC_Colorize()
 
                     "also matcth {{var}} inside strings, eg handlebars
                     exe "syn match ". var_syntax_group . ' /{{\zs' . var . "\\(}}\\)\\@=\\(\\s*\\:\\)\\@!/ display contained containedin=javaScriptStringD_" . level . ",javaScriptStringS_" . level
+                    
+                    "match {var} in jsx
+                    if g:js_context_colors_jsx 
+                        exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=jsxRegion_" . level
+                    endif
 
                     if var_level != -1
                         exe 'hi link ' . var_syntax_group . ' JSCC_Level_' . var_level
