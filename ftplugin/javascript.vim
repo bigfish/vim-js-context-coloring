@@ -252,7 +252,6 @@ function! JSCC_Colorize()
 
         let colordata = eval(colordata_result)
 
-
         let scopes = colordata.scopes
         "let symbols = colordata.symbols
 
@@ -386,6 +385,7 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
+    "clear autocommands 
     try 
         augroup JSContextColorAug
             au! InsertLeave,TextChanged <buffer>
@@ -398,7 +398,12 @@ function! JSCC_Disable()
         augroup END
     endtry
 
-    syntax enable
+    syn clear
+
+    "reinitialize syntax for this buffer
+    "since g:js_context_colors_enabled is 0
+    "it will use whatever syntax is first found in runtimepath
+    runtime! syntax/javascript.vim
 
     let s:jscc_highlight_groups_defined = 0
 endfunction
@@ -423,6 +428,7 @@ command! JSContextColorUpdate call JSCC_DefineHighlightGroups()
 
 "always create color highlight groups in case of direct calls to :JSContextColor
 :JSContextColorUpdate
+
 if g:js_context_colors_usemaps
     if !hasmapto('<Plug>JSContextColor')
         "mnemonic (h)ighlight
