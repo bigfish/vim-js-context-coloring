@@ -293,7 +293,7 @@ function! JSCC_Colorize()
                         let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
                     endif
 
-                    exe "syn match ". var_syntax_group . ' /\_[^.$:alnum:_]\zs' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group 
+                    exe "syn match ". var_syntax_group . ' /\_[^.$[:alnum:]_]\zs' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group 
 
                     "also match ${var} inside template strings
                     exe "syn match ". var_syntax_group . ' /${\zs' . var . "\\(}\\)\\@=\\(\\s*\\:\\)\\@!/ display contained containedin=javaScriptTemplate_" . level
