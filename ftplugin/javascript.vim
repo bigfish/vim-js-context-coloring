@@ -160,26 +160,28 @@ function! JSCC_DefineSyntaxGroups()
 
     syntax cluster jsComment contains=javaScriptComment,javaScriptLineComment
     
+    "allow highlighting of vars inside strings,jsx regions
+    "TODO: fix issue where quote characters inside regex literals breaks highlighting
     
-    for lev in range(s:max_levels)
-        exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
-        exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
-        exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
+    "for lev in range(s:max_levels)
+        "exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
+        "exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
+        "exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
 
-        if g:js_context_colors_jsx 
+        "if g:js_context_colors_jsx 
             " Highlight JSX regions as XML; recursively match.
-            exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
-        endif
+            "exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
+        "endif
 
-        exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
-        exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
-        exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
+        "exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
+        "exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
+        "exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
 
-        if g:js_context_colors_jsx 
-            exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
-        endif
+        "if g:js_context_colors_jsx 
+            "exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
+        "endif
 
-    endfor
+    "endfor
 
 endfunction
 
