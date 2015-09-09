@@ -70,7 +70,8 @@ process.stdin.on('end', function() {
     var scopeManager = escope.analyze(ast, {
             optimistic: true,
             ignoreEval: true,
-            ecmaVersion: 6
+            ecmaVersion: 6,
+            sourceType: 'module'
     }); 
 
     var toplevel = scopeManager.acquire(ast);
