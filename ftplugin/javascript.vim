@@ -193,7 +193,9 @@ function! JSCC_DefineHighlightGroups()
     let s:jscc_highlight_groups_defined = 1
 endfunction
 
-function! JSCC_Colorize()
+"repurposed to be called by neovim node host
+"now takes colordata string
+function! JSCC_Colorize(colordata_result)
     
     "bail if not a js filetype
     if &ft != 'javascript'
@@ -217,42 +219,43 @@ function! JSCC_Colorize()
     let buflines = getline(1, '$')
 
     "replace hashbangs (in node CLI scripts)
-    let linenum  = 0
-    for bline in buflines
-        if match(bline, '#!') == 0
-            "replace #! with // to prevent parse errors
-            "while not throwing off byte count
-            let buflines[linenum] = '//' . strpart(bline, 2)
-            break
-        endif
-        let linenum += 1
-    endfor
+    "let linenum  = 0
+    "for bline in buflines
+        "if match(bline, '#!') == 0
+            ""replace #! with // to prevent parse errors
+            ""while not throwing off byte count
+            "let buflines[linenum] = '//' . strpart(bline, 2)
+            "break
+        "endif
+        "let linenum += 1
+    "endfor
     "fix offset errors caused by windows line endings
     "since 'buflines' does NOT return the line endings
     "we need to replace them for unix/mac file formats
     "and for windows we replace them with a space and \n
     "since \r does not work in node on linux, just replacing
     "with a space will at least correct the offsets
-    if &ff == 'unix' || &ff == 'mac'
-        let buftext = join(buflines, "\n")
-    elseif &ff == 'dos'
-        let buftext = join(buflines, " \n")
-    else
-        echom 'unknown file format' . &ff
-        let buftext = join(buflines, "\n")
-    endif
+    "if &ff == 'unix' || &ff == 'mac'
+        "let buftext = join(buflines, "\n")
+    "elseif &ff == 'dos'
+        "let buftext = join(buflines, " \n")
+    "else
+        "echom 'unknown file format' . &ff
+        "let buftext = join(buflines, "\n")
+    "endif
 
     "noop if empty string
-    if Strip(buftext) == ''
-        return
-    endif
+    "if Strip(buftext) == ''
+        "return
+    "endif
 
     "ignore errors from shell command to prevent distracting user
     "syntax errors should be caught by a lint program
     try
-        let colordata_result = system(s:jscc, buftext)
+        "let colordata_result = system(s:jscc, buftext)
 
-        let colordata = eval(colordata_result)
+        let colordata = eval(a:colordata_result)
+
 
         let scopes = colordata.scopes
         "let symbols = colordata.symbols
@@ -366,8 +369,8 @@ function! JSCC_Enable()
     try
         augroup JSContextColorAug
             "remove if added previously, but only in this buffer
-            au! InsertLeave,TextChanged <buffer> 
-            au! InsertLeave,TextChanged <buffer> :JSContextColor
+            "au! InsertLeave,TextChanged <buffer> 
+            "au! InsertLeave,TextChanged <buffer> :JSContextColor
         augroup END
 
     "if < vim 7.4 TextChanged events are not
@@ -376,13 +379,13 @@ function! JSCC_Enable()
 
             "use different events to trigger update in Vim < 7.4
             augroup JSContextColorAug
-                au! InsertLeave <buffer> 
-                au! InsertLeave <buffer> :JSContextColor
+                "au! InsertLeave <buffer> 
+                "au! InsertLeave <buffer> :JSContextColor
             augroup END
 
     endtry
 
-    :JSContextColor
+    ":JSContextColor
 
 endfunction
 
@@ -422,7 +425,8 @@ endfunction
 
 "define user commands
 "command! -range=% -nargs=0 JSContextColor <line1>,<line2>:call JSCC_Colorize()
-command! JSContextColor call JSCC_Colorize()
+"this will no longer work as is
+"command! JSContextColor call JSCC_Colorize()
 
 command! JSContextColorToggle call JSCC_Toggle()
 
