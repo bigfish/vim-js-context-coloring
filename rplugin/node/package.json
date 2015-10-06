@@ -19,6 +19,7 @@
     "uglify-js": "~2.4.15",
     "escope": "~3.2.0",
     "esprima": "~2.5.0",
-    "acorn-jsx": "~2.0.0"
+    "acorn-jsx": "~2.0.0",
+    "promise": "~7.0.4"
   }
 }

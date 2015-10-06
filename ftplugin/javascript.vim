@@ -10,58 +10,18 @@ if exists("b:did_jscc_ftplugin")
 endif
 let b:did_jscc_ftplugin = 1
 
-let s:cli_cmd = 'jscc-cli'
-
 " check options to send as CLI params
 if !exists('g:js_context_colors_jsx')
     let g:js_context_colors_jsx = 0
 endif
 
+" SET FLAGS IF NOT SET
 "however, if current buffer file extension is .jsx
 "turn on jsx flag
 let b:file_ext = expand('%:e')
 if b:file_ext == "jsx"
     let g:js_context_colors_jsx = 1
 endif
-
-if g:js_context_colors_jsx 
-    let s:cli_cmd .= ' --jsx'
-endif
-
-if !exists('g:js_context_colors_block_scope')
-    let g:js_context_colors_block_scope = 0
-endif
-
-if g:js_context_colors_block_scope 
-    let s:cli_cmd .= ' --block-scope'
-endif
-
-if !exists('g:js_context_colors_block_scope_with_let')
-    let g:js_context_colors_block_scope_with_let = 0
-endif
-
-if !exists('g:js_context_colors_highlight_function_names')
-    let g:js_context_colors_highlight_function_names = 0
-endif
-
-if g:js_context_colors_highlight_function_names
-    let s:cli_cmd .= ' --highlight-function-names'
-endif
-
-if g:js_context_colors_block_scope_with_let 
-    let s:cli_cmd .= ' --block-scope-with-let'
-endif
-
-"revert to old cli if es5 option is given
-if !exists('g:js_context_colors_es5')
-    let g:js_context_colors_es5 = 0
-endif
-
-if g:js_context_colors_es5
-    let s:cli_cmd = 'jscc-cli-legacy'
-endif
-
-let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
 
 let s:region_count = 1
 
@@ -80,14 +40,14 @@ if !exists('g:js_context_colors_colorize_comments')
     let g:js_context_colors_colorize_comments = 0
 endif
 
+"default fold to off as it has a performance hit on larger files when setting foldlevel
 if !exists('g:js_context_colors_fold')
-    let g:js_context_colors_fold = 1
+    let g:js_context_colors_fold = 0
 endif
 
 if !exists('g:js_context_colors_foldlevel')
     let g:js_context_colors_foldlevel = 9
 endif
-
 
 if !exists('g:js_context_colors_show_error_message')
     let g:js_context_colors_show_error_message = 0
@@ -215,8 +175,6 @@ function! JSCC_Colorize(colordata_result)
     if !s:jscc_highlight_groups_defined
         call JSCC_DefineHighlightGroups()
     endif
-
-    let buflines = getline(1, '$')
 
     "replace hashbangs (in node CLI scripts)
     "let linenum  = 0

@@ -1,35 +1,110 @@
 
+var Promise = require('promise');
+
 //options
 //TODO: set them from vim global vars
 // --jsx : support JSX syntax
 // --block-scope : highlight block scope (if es6 is on)
 // --block-scope-with-let : highlight block scope only if it contains let variables
 // --highlight-function-names : highlight names in function declarations
-var jsx = false;
-var block_scope = false;
-var block_scope_with_let = true;
-var highlight_function_names = true;
 
-//parser depends on if jsx support is required
-//acorn-jsx should work for es6 
-//but escope seems to favor esprima in some cases
-if (jsx) {
-    var acorn = require('acorn-jsx');
-} else {
-    var esprima = require('esprima');
+var options = {
+    jsx: false,
+    block_scope: false,
+    block_scope_with_let: true,
+    highlight_function_names: true,
+    es5: false,
+    enabled: true,
+    debug: false
+};
+
+var option_names = Object.keys(options);
+
+var acorn;
+var esprima;
+var getVar;
+
+function setConfig(nv, cb) {
+
+    //promise-ified version of nvim.getVar()
+    getVar = function (varname) {
+        return new Promise(function (resolve, reject) {
+            //check var exists 
+            nv.callFunction('exists', [varname], function (err, res) {
+                if (res) {
+                    nv.getVar(varname, function (err, res) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(res);
+                        } 
+                    });
+                } else {
+                    debug('var:' + varname + ' not found -- setting to default');
+                    resolve(null);
+                }
+            })
+        });
+    } 
+
+    //get options values
+    Promise.all(option_names.map(function (key) {
+        return getVar('js_context_colors_' + key);
+    })).then(function (res) {
+
+        debug(res);
+        res.forEach(function (val, idx) {
+            if (val !== null) {
+                options[option_names[idx]] = val;
+            }
+        });
+
+        //parser depends on if jsx support is required
+        //acorn-jsx should work for es6 
+        //but escope seems to favor esprima in some cases
+        if (options.jsx) {
+            acorn = require('acorn-jsx');
+        } else {
+            esprima = require('esprima');
+        }
+
+        cb();
+
+    }).catch(function (err) {
+        debug('error reading config vars', err);
+    });
 }
 
 var escope = require('escope');
+
+function hasLet(scope) {
+    var v,
+    variable,
+    vlen = scope.variables.length;
+
+    for (v = 0; v < vlen; v++) {
+        variable = scope.variables[v];
+        if (variable.defs.length &&
+            variable.defs[0].type === "Variable" &&
+                variable.defs[0].parent.kind === 'let') {
+            return true;
+        }
+
+    }
+    return false;
+
+}
 
 function getScopes(input_js) {
 
     var scopes = [];
     var ast;
     
-    if (jsx) {
+    if (options.jsx) {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
             ranges: true,
+            allowHashBang: true,
             plugins: { jsx: true }
         });
 
@@ -44,6 +119,7 @@ function getScopes(input_js) {
             optimistic: true,
             ignoreEval: true,
             ecmaVersion: 6,
+            //tolerate export
             sourceType: 'module'
     }); 
 
@@ -67,24 +143,6 @@ function getScopes(input_js) {
     });
     scopes.push([0, toplevel.block.range[0], toplevel.block.range[1], enclosed]);
 
-    function hasLet(scope) {
-            var v,
-            variable,
-            vlen = scope.variables.length;
-
-            for (v = 0; v < vlen; v++) {
-                    variable = scope.variables[v];
-                    if (variable.defs.length &&
-                        variable.defs[0].type === "Variable" &&
-                                variable.defs[0].parent.kind === 'let') {
-                            return true;
-                    }
-
-            }
-            return false;
-    
-    }
-
     function setLevel(scope, level) {
 
         var enclosed = {};
@@ -95,7 +153,7 @@ function getScopes(input_js) {
         if (level) {
 
             //add function name to enclosed vars
-            if (highlight_function_names &&
+            if (options.highlight_function_names &&
                 scope.type === 'function' &&
                     scope.block.type === 'FunctionDeclaration') {
                 enclosed[scope.block.id.name] = level - 1;
@@ -126,9 +184,9 @@ function getScopes(input_js) {
             scope.childScopes.forEach(function (s) {
 
                 //only color function scopes unless use_block_scope is true
-                if (block_scope || s.type === "function") {
+                if (options.block_scope || s.type === "function") {
                     setLevel(s, level + 1);
-                } else if (block_scope_with_let && hasLet(s)) {
+                } else if (options.block_scope_with_let && hasLet(s)) {
                     setLevel(s, level + 1);
                 } else {
                     setLevel(s, level);
@@ -169,7 +227,9 @@ function getBufferText(nv) {
 plugin.autocmd('BufRead', {
     pattern: '*.js'
 }, function (nvim, filename) {
-    getBufferText(nvim);
+    setConfig(nvim, function () {
+        getBufferText(nvim);
+    });
 })
 plugin.autocmd('TextChanged', {
     pattern: '<buffer>'
