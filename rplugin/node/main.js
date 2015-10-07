@@ -24,7 +24,13 @@ var acorn;
 var esprima;
 var getVar;
 
-function setConfig(nv, cb) {
+function _debug() {
+    if (options.debug) {
+        debug.apply(null, arguments);
+    }
+}
+
+function setConfig(nv) {
 
     //promise-ified version of nvim.getVar()
     getVar = function (varname) {
@@ -40,7 +46,7 @@ function setConfig(nv, cb) {
                         } 
                     });
                 } else {
-                    debug('var:' + varname + ' not found -- setting to default');
+                    _debug('var:' + varname + ' not found -- setting to default');
                     resolve(null);
                 }
             })
@@ -52,7 +58,6 @@ function setConfig(nv, cb) {
         return getVar('js_context_colors_' + key);
     })).then(function (res) {
 
-        debug(res);
         res.forEach(function (val, idx) {
             if (val !== null) {
                 options[option_names[idx]] = val;
@@ -68,10 +73,12 @@ function setConfig(nv, cb) {
             esprima = require('esprima');
         }
 
-        cb();
+        if (options.enabled) {
+            addAutoCommands();
+        }
 
     }).catch(function (err) {
-        debug('error reading config vars', err);
+        _debug('error reading config vars', err);
     });
 }
 
@@ -205,18 +212,18 @@ function getScopes(input_js) {
 function getBufferText(nv) {
     //var start = (new Date()).getTime();
     nv.callFunction('getline', [1, '$'], function (err, res) {
-        if (err) debug(err);
+        if (err) _debug(err);
         var buftext = res.join("\n");
         var scopes;
 
         try {
             scopes = getScopes(buftext);
         } catch (e) {
-            debug('error occured:' + e);
+            _debug('error occured:' + e);
         }
         
-        nv.callFunction('JSCC_Colorize', [JSON.stringify({scopes: scopes})], function (err) {
-            if (err) debug(err);
+        nv.callFunction('JSCC_Colorize2', [JSON.stringify({scopes: scopes})], function (err) {
+            if (err) _debug(err);
             //var end = (new Date()).getTime();
             //debug('duration: ' + (end - start));
         });
@@ -226,19 +233,31 @@ function getBufferText(nv) {
 
 plugin.autocmd('BufRead', {
     pattern: '*.js'
-}, function (nvim, filename) {
-    setConfig(nvim, function () {
-        getBufferText(nvim);
-    });
-})
-plugin.autocmd('TextChanged', {
-    pattern: '<buffer>'
-}, function (nvim, filename) {
-    getBufferText(nvim);
-})
-plugin.autocmd('InsertLeave', {
-    pattern: '<buffer>'
-}, function (nvim, filename) {
-    getBufferText(nvim);
-})
+}, setConfig);
 
+plugin.autocmd('User', {
+    pattern: 'jscc.enable'
+}, function (nvim) {
+    options.enabled = true;
+    //colorize
+    getBufferText(nvim);
+});
+
+plugin.autocmd('User', {
+    pattern: 'jscc.disable'
+}, function (nvim) {
+    options.enabled = false;
+});
+
+function addAutoCommands(argument) {
+    plugin.autocmd('TextChanged', {
+        pattern: '<buffer>'
+    }, function (nvim, filename) {
+        getBufferText(nvim);
+    })
+    plugin.autocmd('InsertLeave', {
+        pattern: '<buffer>'
+    }, function (nvim, filename) {
+        getBufferText(nvim);
+    })
+}
