@@ -32,6 +32,8 @@ function _debug() {
 
 function setConfig(nv) {
 
+_debug('setConfig');
+
     //promise-ified version of nvim.getVar()
     getVar = function (varname) {
         return new Promise(function (resolve, reject) {
@@ -49,9 +51,9 @@ function setConfig(nv) {
                     _debug('var:' + varname + ' not found -- setting to default');
                     resolve(null);
                 }
-            })
+            });
         });
-    } 
+    };
 
     //get options values
     Promise.all(option_names.map(function (key) {
@@ -74,7 +76,8 @@ function setConfig(nv) {
         }
 
         if (options.enabled) {
-            addAutoCommands();
+            _debug('calling getBufferText from getConfig');
+            getBufferText(nv);
         }
 
     }).catch(function (err) {
@@ -203,16 +206,20 @@ function getScopes(input_js) {
 
     }
 
-    setLevel(toplevel, 0)
+    setLevel(toplevel, 0);
 
     return scopes;
 }
 
 //VIM bindings
 function getBufferText(nv) {
+
     //var start = (new Date()).getTime();
     nv.callFunction('getline', [1, '$'], function (err, res) {
         if (err) _debug(err);
+
+        _debug(res.length);
+
         var buftext = res.join("\n");
         var scopes;
 
@@ -231,33 +238,10 @@ function getBufferText(nv) {
 
 }
 
-plugin.autocmd('BufRead', {
-    pattern: '*.js'
+plugin.autocmdSync('Syntax', {
+    pattern: 'javascript'
 }, setConfig);
 
 plugin.autocmd('User', {
-    pattern: 'jscc.enable'
-}, function (nvim) {
-    options.enabled = true;
-    //colorize
-    getBufferText(nvim);
-});
-
-plugin.autocmd('User', {
-    pattern: 'jscc.disable'
-}, function (nvim) {
-    options.enabled = false;
-});
-
-function addAutoCommands(argument) {
-    plugin.autocmd('TextChanged', {
-        pattern: '<buffer>'
-    }, function (nvim, filename) {
-        getBufferText(nvim);
-    })
-    plugin.autocmd('InsertLeave', {
-        pattern: '<buffer>'
-    }, function (nvim, filename) {
-        getBufferText(nvim);
-    })
-}
+    pattern: 'jscc.colorize'
+}, getBufferText);

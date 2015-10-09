@@ -196,47 +196,47 @@ endfunction
 
 "vim version -- use external CLI command to get colordata
 function! JSCC_Colorize()
+    "echom 'JSCC_Colorize'
 
-    let buflines = getline(1, '$')
+    "let buflines = getline(1, '$')
+    "echom 'numlines:' . len(buflines)
 
     "replace hashbangs (in node CLI scripts)
-    let linenum  = 0
-    for bline in buflines
-        if match(bline, '#!') == 0
-            "replace #! with // to prevent parse errors
-            "while not throwing off byte count
-            let buflines[linenum] = '//' . strpart(bline, 2)
-            break
-        endif
-        let linenum += 1
-    endfor
+    "let linenum  = 0
+    "for bline in buflines
+        "if match(bline, '#!') == 0
+            ""replace #! with // to prevent parse errors
+            ""while not throwing off byte count
+            "let buflines[linenum] = '//' . strpart(bline, 2)
+            "break
+        "endif
+        "let linenum += 1
+    "endfor
     "fix offset errors caused by windows line endings
     "since 'buflines' does NOT return the line endings
     "we need to replace them for unix/mac file formats
     "and for windows we replace them with a space and \n
     "since \r does not work in node on linux, just replacing
     "with a space will at least correct the offsets
-    if &ff == 'unix' || &ff == 'mac'
-        let buftext = join(buflines, "\n")
-    elseif &ff == 'dos'
-        let buftext = join(buflines, " \n")
-    else
-        echom 'unknown file format' . &ff
-        let buftext = join(buflines, "\n")
-    endif
+    "if &ff == 'unix' || &ff == 'mac'
+        "let buftext = join(buflines, "\n")
+    "elseif &ff == 'dos'
+        "let buftext = join(buflines, " \n")
+    "else
+        "echom 'unknown file format' . &ff
+        "let buftext = join(buflines, "\n")
+    "endif
 
-    "noop if empty string
-    if Strip(buftext) == ''
-        return
-    endif
+    ""noop if empty string
+    "if Strip(buftext) == ''
+        "return
+    "endif
 
-    let colordata_result = system(s:jscc, buftext)
-
-    call JSCC_Colorize2(colordata_result)
+    doautocmd User jscc.colorize
 
 endfunction 
 
-"alos called asynchronously by neovim node host
+"called asynchronously by neovim node host
 function! JSCC_Colorize2(colordata_result)
     
     "bail if not a js filetype
@@ -264,6 +264,10 @@ function! JSCC_Colorize2(colordata_result)
     try
 
         let colordata = eval(a:colordata_result)
+
+        "if g:js_context_colors_debug
+            "echom "result: " . a:colordata_result
+        "endif
 
         let scopes = colordata.scopes
         "let symbols = colordata.symbols
@@ -349,10 +353,6 @@ function! JSCC_Colorize2(colordata_result)
             echom "Syntax Error [JSContextColors]"
         endif
 
-        if g:js_context_colors_debug
-            echom a:colordata_result
-        endif
-
     endtry
 
     "ensure syntax highlighting is fully applied
@@ -360,7 +360,7 @@ function! JSCC_Colorize2(colordata_result)
 
 endfunction
 
-let b:initial_load = 1
+"let b:initial_load = 1
 
 function! JSCC_Enable()
 
@@ -375,21 +375,41 @@ function! JSCC_Enable()
         exe "setlocal foldlevel=" . g:js_context_colors_foldlevel
     endif
 
-    "initially use synchronous API to prevent flash of unstyled code
-    if b:initial_load
-        :JSContextColor
-        let b:initial_load = 0
-    else
-        "tell nodehost to enable (and re-colorize)
-        :doautocmd User jscc.enable
-    endif
+    try
+        augroup JSContextColorAug
+            "remove if added previously, but only in this buffer
+            au! InsertLeave,TextChanged <buffer> 
+            au! InsertLeave,TextChanged <buffer> :JSContextColor
+        augroup END
+
+    "if < vim 7.4 TextChanged events are not
+    "available and will result in error E216
+    catch /^Vim\%((\a\+)\)\=:E216/
+
+            "use different events to trigger update in Vim < 7.4
+            augroup JSContextColorAug
+                au! InsertLeave <buffer> 
+                au! InsertLeave <buffer> :JSContextColor
+            augroup END
+
+    endtry
 
 
 endfunction
 
 function! JSCC_Disable()
+    "clear autocommands 
+    try 
+        augroup JSContextColorAug
+            au! InsertLeave,TextChanged <buffer>
+        augroup END
 
-    let g:js_context_colors_enabled = 0
+    catch /^Vim\%((\a\+)\)\=:E216/
+
+        augroup JSContextColorAug
+            au! InsertLeave <buffer>
+        augroup END
+    endtry
 
     syn clear
 
@@ -400,16 +420,16 @@ function! JSCC_Disable()
 
     let s:jscc_highlight_groups_defined = 0
 
-    "tell nodehost to disable
-    :doautocmd User jscc.disable
-
 endfunction
 
 function! JSCC_Toggle()
     if g:js_context_colors_enabled
+        let g:js_context_colors_enabled = 0
         call JSCC_Disable()
     else
+        let g:js_context_colors_enabled = 1
         call JSCC_Enable()
+        call JSCC_Colorize()
     endif
 endfunction
 
