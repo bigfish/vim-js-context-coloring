@@ -214,17 +214,17 @@ function getScopes(input_js) {
 //VIM bindings
 function getBufferText(nv) {
 
+    //get file format (DOS or UNIX or MAC) for this buffer so we know how to handle line endings
     //var start = (new Date()).getTime();
-    nv.callFunction('getline', [1, '$'], function (err, res) {
+    nv.callFunction('JSCC_GetBufferText', [], function (err, res) {
         if (err) _debug(err);
 
-        _debug(res.length);
+        _debug(res);
 
-        var buftext = res.join("\n");
         var scopes;
 
         try {
-            scopes = getScopes(buftext);
+            scopes = getScopes(res);
         } catch (e) {
             _debug('error occured:' + e);
         }

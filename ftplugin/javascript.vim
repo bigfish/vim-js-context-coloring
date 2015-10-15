@@ -194,47 +194,53 @@ function! JSCC_DefineHighlightGroups()
     let s:jscc_highlight_groups_defined = 1
 endfunction
 
+
+
 "vim version -- use external CLI command to get colordata
 function! JSCC_Colorize()
     "echom 'JSCC_Colorize'
 
-    "let buflines = getline(1, '$')
-    "echom 'numlines:' . len(buflines)
+
+    doautocmd User jscc.colorize
+
+endfunction 
+
+function! JSCC_GetBufferText()
+
+    let buflines = getline(1, '$')
+    let buftext = ""
 
     "replace hashbangs (in node CLI scripts)
-    "let linenum  = 0
-    "for bline in buflines
-        "if match(bline, '#!') == 0
-            ""replace #! with // to prevent parse errors
-            ""while not throwing off byte count
-            "let buflines[linenum] = '//' . strpart(bline, 2)
-            "break
-        "endif
-        "let linenum += 1
-    "endfor
+    let linenum  = 0
+    for bline in buflines
+        if match(bline, '#!') == 0
+            "replace #! with // to prevent parse errors
+            "while not throwing off byte count
+            let buflines[linenum] = '//' . strpart(bline, 2)
+            break
+        endif
+        let linenum += 1
+    endfor
     "fix offset errors caused by windows line endings
     "since 'buflines' does NOT return the line endings
     "we need to replace them for unix/mac file formats
     "and for windows we replace them with a space and \n
     "since \r does not work in node on linux, just replacing
     "with a space will at least correct the offsets
-    "if &ff == 'unix' || &ff == 'mac'
-        "let buftext = join(buflines, "\n")
-    "elseif &ff == 'dos'
-        "let buftext = join(buflines, " \n")
-    "else
-        "echom 'unknown file format' . &ff
-        "let buftext = join(buflines, "\n")
-    "endif
+    if &ff == 'unix' || &ff == 'mac'
+        let buftext = join(buflines, "\n")
+    elseif &ff == 'dos'
+        let buftext = join(buflines, " \n")
+    endif
 
-    ""noop if empty string
-    "if Strip(buftext) == ''
-        "return
-    "endif
+    "noop if empty string
+    if Strip(buftext) == ''
+        return ""
+    endif
 
-    doautocmd User jscc.colorize
+    return buftext
 
-endfunction 
+endfunction
 
 "called asynchronously by neovim node host
 function! JSCC_Colorize2(colordata_result)
