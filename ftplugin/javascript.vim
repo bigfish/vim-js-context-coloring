@@ -68,13 +68,16 @@ let s:region_count = 1
 
 syntax case match
 
+setlocal iskeyword+=$
+
 "set default options if no provided value
 if !exists('g:js_context_colors_enabled')
     let g:js_context_colors_enabled = 1
 endif
 
+"turn off by default
 if !exists('g:js_context_colors_usemaps')
-    let g:js_context_colors_usemaps = 1
+    let g:js_context_colors_usemaps = 0
 endif
 
 if !exists('g:js_context_colors_colorize_comments')
@@ -99,6 +102,23 @@ if !exists('g:js_context_colors_debug')
 endif
 
 let s:max_levels = 10
+
+"used by neovim
+function! JSCC_GetConfig()
+    echo "JSCC_GetConfig()"
+    "construct JSON
+    let json =  "{".
+                \'"jsx":' . g:js_context_colors_jsx . "," .
+                \'"block_scope":' . g:js_context_colors_block_scope . "," .
+                \'"block_scope_with_let":'  . g:js_context_colors_block_scope_with_let . "," .
+                \'"highlight_function_names":' . g:js_context_colors_highlight_function_names . "," .
+                \'"es5":' . g:js_context_colors_es5 . "," .
+                \'"enabled":' . g:js_context_colors_enabled . "," .
+                \'"debug":' . g:js_context_colors_debug . "}"
+    "echom json
+    return json
+
+endfunction
 
 "parse functions
 function! Strip(input_string)
@@ -164,25 +184,25 @@ function! JSCC_DefineSyntaxGroups()
     "allow highlighting of vars inside strings,jsx regions
     "TODO: fix issue where quote characters inside regex literals breaks highlighting
     
-    "for lev in range(s:max_levels)
-        "exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
-        "exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
-        "exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
+    for lev in range(s:max_levels)
+        exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
+        exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
+        exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
 
-        "if g:js_context_colors_jsx 
-            " Highlight JSX regions as XML; recursively match.
-            "exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
-        "endif
+        if g:js_context_colors_jsx 
+             Highlight JSX regions as XML; recursively match.
+            exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
+        endif
 
-        "exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
-        "exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
-        "exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
+        exe 'hi link javaScriptStringS_' . lev . ' JSCC_Level_' . lev
+        exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
+        exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
 
-        "if g:js_context_colors_jsx 
-            "exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
-        "endif
+        if g:js_context_colors_jsx 
+            exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
+        endif
 
-    "endfor
+    endfor
 
 endfunction
 
@@ -400,7 +420,6 @@ function! JSCC_Enable()
 
     endtry
 
-
 endfunction
 
 function! JSCC_Disable()
@@ -461,4 +480,8 @@ if g:js_context_colors_usemaps
         "mnemonic (t)oggle
         nnoremap <buffer> <silent> <localleader>t :JSContextColorToggle<CR>
     endif
+endif
+
+if g:js_context_colors_enabled
+    call JSCC_Enable()
 endif

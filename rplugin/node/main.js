@@ -32,57 +32,34 @@ function _debug() {
 
 function setConfig(nv) {
 
-_debug('setConfig');
+    _debug('setConfig');
 
-    //promise-ified version of nvim.getVar()
-    getVar = function (varname) {
-        return new Promise(function (resolve, reject) {
-            //check var exists 
-            nv.callFunction('exists', [varname], function (err, res) {
-                if (res) {
-                    nv.getVar(varname, function (err, res) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(res);
-                        } 
-                    });
-                } else {
-                    _debug('var:' + varname + ' not found -- setting to default');
-                    resolve(null);
-                }
-            });
-        });
-    };
-
-    //get options values
-    Promise.all(option_names.map(function (key) {
-        return getVar('js_context_colors_' + key);
-    })).then(function (res) {
-
-        res.forEach(function (val, idx) {
-            if (val !== null) {
-                options[option_names[idx]] = val;
+    nv.callFunction('JSCC_GetConfig', [], function (err, res) {
+        if (err) _debug(err);
+        if (res) {
+            try {
+                options = JSON.parse(res);
+            } catch (e) {
+                _debug(e);
             }
-        });
+            _debug(options);
+            if (options.jsx) {
+                acorn = require('acorn-jsx');
+            } else {
+                esprima = require('esprima');
+            }
 
-        //parser depends on if jsx support is required
-        //acorn-jsx should work for es6 
-        //but escope seems to favor esprima in some cases
-        if (options.jsx) {
-            acorn = require('acorn-jsx');
+            if (options.enabled) {
+                _debug('calling getBufferText from getConfig');
+                getBufferText(nv);
+            }
         } else {
-            esprima = require('esprima');
+            _debug('no result from JSCC_GetConfig()');
         }
 
-        if (options.enabled) {
-            _debug('calling getBufferText from getConfig');
-            getBufferText(nv);
-        }
-
-    }).catch(function (err) {
-        _debug('error reading config vars', err);
+        
     });
+
 }
 
 var escope = require('escope');
@@ -238,8 +215,8 @@ function getBufferText(nv) {
 
 }
 
-plugin.autocmdSync('Syntax', {
-    pattern: 'javascript'
+plugin.autocmdSync('BufRead', {
+    pattern: '*.js'
 }, setConfig);
 
 plugin.autocmd('User', {

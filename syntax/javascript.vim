@@ -12,11 +12,9 @@
 
 if &filetype == 'javascript' && exists('g:js_context_colors_enabled') && g:js_context_colors_enabled
 
-    setlocal iskeyword+=$
-
     call JSCC_Enable()
-
     "set syntax to javascript so another syntax for javascript isn't loaded
     let b:current_syntax="javascript"
+
 endif
 
