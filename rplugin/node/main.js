@@ -82,17 +82,25 @@ function hasLet(scope) {
 
 }
 
+var import_re = /^\s*import\s/m;
+var export_re = /^\s*export\s/m;
+
+function isModule(js) {
+    return import_re.test(js) || export_re.test(js);
+}
+
 function getScopes(input_js) {
 
     var scopes = [];
     var ast;
+    var sourceType = isModule(input_js) ? 'module' : 'script';
     
     if (options.jsx) {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
             ranges: true,
             allowHashBang: true,
-            sourceType: 'module',
+            sourceType: sourceType,
             plugins: { jsx: true }
         });
 
@@ -107,8 +115,7 @@ function getScopes(input_js) {
             optimistic: true,
             ignoreEval: true,
             ecmaVersion: 6,
-            //tolerate export
-            sourceType: 'module'
+            sourceType: sourceType
     }); 
 
     var toplevel = scopeManager.acquire(ast);
@@ -172,7 +179,10 @@ function getScopes(input_js) {
             scope.childScopes.forEach(function (s) {
 
                 //only color function scopes unless use_block_scope is true
-                if (options.block_scope || s.type === "function") {
+                if (options.block_scope ||
+                        s.type === "function" ||
+                        s.type === "module" ||
+                        s.type === "class") {
                     setLevel(s, level + 1);
                 } else if (options.block_scope_with_let && hasLet(s)) {
                     setLevel(s, level + 1);
