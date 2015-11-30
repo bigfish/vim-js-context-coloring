@@ -190,7 +190,7 @@ function! JSCC_DefineSyntaxGroups()
         exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
 
         if g:js_context_colors_jsx 
-             Highlight JSX regions as XML; recursively match.
+             "Highlight JSX regions as XML; recursively match.
             exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
         endif
 

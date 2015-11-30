@@ -92,6 +92,7 @@ function getScopes(input_js) {
             ecmaVersion: 6,
             ranges: true,
             allowHashBang: true,
+            sourceType: 'module',
             plugins: { jsx: true }
         });
 
