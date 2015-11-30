@@ -154,6 +154,13 @@ function getScopes(input_js) {
                 enclosed[scope.block.id.name] = level - 1;
             }
 
+            //also highlight class names with the scope theyre exported into
+            if (options.highlight_function_names &&
+                scope.type === 'class' &&
+                    scope.block.type === 'ClassDeclaration') {
+                enclosed[scope.block.id.name] = level - 1;
+            }
+
             scope.through.forEach(function (ref) {
                 if (ref.resolved) {
                     enclosed[ref.identifier.name] = ref.resolved.scope.level;
