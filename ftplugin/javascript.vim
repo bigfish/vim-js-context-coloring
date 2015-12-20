@@ -101,6 +101,10 @@ if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
 
+if !exists('g:js_context_colors_theme')
+    let g:js_context_colors_theme = 'js_context_colors'
+endif
+
 let s:max_levels = 10
 
 "used by neovim
@@ -209,7 +213,7 @@ endfunction
 "define highlight groups dynamically
 function! JSCC_DefineHighlightGroups()
 
-    colors js_context_colors
+    exe "colors " . g:js_context_colors_theme
 
     let s:jscc_highlight_groups_defined = 1
 endfunction
@@ -218,8 +222,6 @@ endfunction
 
 "vim version -- use external CLI command to get colordata
 function! JSCC_Colorize()
-    "echom 'JSCC_Colorize'
-
 
     doautocmd User jscc.colorize
 
@@ -264,7 +266,7 @@ endfunction
 
 "called asynchronously by neovim node host
 function! JSCC_Colorize2(colordata_result)
-    
+
     "bail if not a js filetype
     if &ft != 'javascript'
         return
@@ -380,6 +382,11 @@ function! JSCC_Colorize2(colordata_result)
         endif
 
     endtry
+
+    "re-highlight eslint highlighting if we find eslint errors
+    if b:did_eslint_ftplugin && len(b:lint_errors)
+        call ShowEslintErrorHighlighting()
+    endif
 
     "ensure syntax highlighting is fully applied
     syntax sync fromstart
