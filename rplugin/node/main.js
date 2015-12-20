@@ -233,8 +233,8 @@ function getBufferText(nv) {
 
 }
 
-plugin.autocmdSync('BufRead', {
-    pattern: '*.js'
+plugin.autocmdSync('FileType', {
+    pattern: 'javascript'
 }, setConfig);
 
 plugin.autocmd('User', {

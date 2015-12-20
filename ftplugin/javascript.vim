@@ -109,7 +109,6 @@ let s:max_levels = 10
 
 "used by neovim
 function! JSCC_GetConfig()
-    echo "JSCC_GetConfig()"
     "construct JSON
     let json =  "{".
                 \'"jsx":' . g:js_context_colors_jsx . "," .
