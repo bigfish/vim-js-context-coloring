@@ -382,11 +382,6 @@ function! JSCC_Colorize2(colordata_result)
 
     endtry
 
-    "re-highlight eslint highlighting if we find eslint errors
-    if b:did_eslint_ftplugin && len(b:lint_errors)
-        call ShowEslintErrorHighlighting()
-    endif
-
     "ensure syntax highlighting is fully applied
     syntax sync fromstart
 
