@@ -57,7 +57,6 @@ function setConfig(nv) {
             _debug('no result from JSCC_GetConfig()');
         }
 
-        
     });
 
 }
@@ -94,7 +93,7 @@ function getScopes(input_js) {
     var scopes = [];
     var ast;
     var sourceType = isModule(input_js) ? 'module' : 'script';
-    
+
     if (options.jsx) {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
@@ -116,7 +115,7 @@ function getScopes(input_js) {
             ignoreEval: true,
             ecmaVersion: 6,
             sourceType: sourceType
-    }); 
+    });
 
     var toplevel = scopeManager.acquire(ast);
 
@@ -172,15 +171,15 @@ function getScopes(input_js) {
                         //undeclared global level is -1
                         enclosed[ref.identifier.name] = -1;
                     }
-                    /*else if (undeclared_globals.indexOf(ref.identifier.name) !== -1) { 
+                    /*else if (undeclared_globals.indexOf(ref.identifier.name) !== -1) {
                         enclosed[ref.identifier.name] = -1;
                     }*/
                 }
-            });           
+            });
 
             scopes.push([level, scope.block.range[0], scope.block.range[1], enclosed]);
         }
-            
+
         //recurse into childScopes
         if (scope.childScopes.length) {
             scope.childScopes.forEach(function (s) {
@@ -214,7 +213,7 @@ function getBufferText(nv) {
     nv.callFunction('JSCC_GetBufferText', [], function (err, res) {
         if (err) _debug(err);
 
-        _debug(res);
+        //_debug(res);
 
         var scopes;
 
@@ -223,7 +222,7 @@ function getBufferText(nv) {
         } catch (e) {
             _debug('error occured:' + e);
         }
-        
+
         nv.callFunction('JSCC_Colorize2', [JSON.stringify({scopes: scopes})], function (err) {
             if (err) _debug(err);
             //var end = (new Date()).getTime();
@@ -233,10 +232,10 @@ function getBufferText(nv) {
 
 }
 
-plugin.autocmdSync('FileType', {
+plugin.autocmd('FileType', {
     pattern: 'javascript'
 }, setConfig);
 
 plugin.autocmd('User', {
     pattern: 'jscc.colorize'
-}, getBufferText);
+},  getBufferText);

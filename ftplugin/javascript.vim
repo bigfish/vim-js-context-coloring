@@ -118,7 +118,7 @@ function! JSCC_GetConfig()
                 \'"es5":' . g:js_context_colors_es5 . "," .
                 \'"enabled":' . g:js_context_colors_enabled . "," .
                 \'"debug":' . g:js_context_colors_debug . "}"
-    "echom json
+    echom json
     return json
 
 endfunction
@@ -267,7 +267,7 @@ endfunction
 function! JSCC_Colorize2(colordata_result)
 
     "bail if not a js filetype
-    if &ft != 'javascript'
+    if stridx(&ft, 'javascript') != 0 
         return
     endif
 
