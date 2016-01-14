@@ -118,7 +118,6 @@ function! JSCC_GetConfig()
                 \'"es5":' . g:js_context_colors_es5 . "," .
                 \'"enabled":' . g:js_context_colors_enabled . "," .
                 \'"debug":' . g:js_context_colors_debug . "}"
-    echom json
     return json
 
 endfunction

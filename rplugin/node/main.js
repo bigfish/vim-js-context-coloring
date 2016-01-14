@@ -32,8 +32,6 @@ function _debug() {
 
 function setConfig(nv) {
 
-    _debug('setConfig');
-
     nv.callFunction('JSCC_GetConfig', [], function (err, res) {
         if (err) _debug(err);
         if (res) {
@@ -42,7 +40,6 @@ function setConfig(nv) {
             } catch (e) {
                 _debug(e);
             }
-            _debug(options);
             if (options.jsx) {
                 acorn = require('acorn-jsx');
             } else {
@@ -212,8 +209,6 @@ function getBufferText(nv) {
     //var start = (new Date()).getTime();
     nv.callFunction('JSCC_GetBufferText', [], function (err, res) {
         if (err) _debug(err);
-
-        //_debug(res);
 
         var scopes;
 
