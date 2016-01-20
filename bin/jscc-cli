@@ -57,6 +57,9 @@ process.stdin.on('end', function() {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
             ranges: true,
+            sourceType: "module",
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
             plugins: { jsx: true }
         });
 
