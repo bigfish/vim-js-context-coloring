@@ -49,15 +49,23 @@ process.stdin.on('data', function(chunk) {
     input_js += chunk;
 });
 
+var import_re = /^\s*import\s/m;
+var export_re = /^\s*export\s/m;
+
+function isModule(js) {
+    return import_re.test(js) || export_re.test(js);
+}
+
 process.stdin.on('end', function() {
 
     var ast;
+    var sourceType = isModule(input_js) ? 'module' : 'script';
     
     if (jsx) {
         ast = acorn.parse(input_js, {
             ecmaVersion: 6,
             ranges: true,
-            sourceType: "module",
+            sourceType: sourceType,
             allowImportExportEverywhere: true,
             allowReturnOutsideFunction: true,
             plugins: { jsx: true }
@@ -74,7 +82,7 @@ process.stdin.on('end', function() {
             optimistic: true,
             ignoreEval: true,
             ecmaVersion: 6,
-            sourceType: 'module'
+            sourceType: sourceType,
     }); 
 
     var toplevel = scopeManager.acquire(ast);
