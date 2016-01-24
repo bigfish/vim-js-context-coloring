@@ -212,6 +212,47 @@ By default, <localleader>t is mapped to the `JSContextColorToggle` command.
 
 These are local to the buffer. They can be disabled by setting the `g:js_context_colors_usemaps` variable to 0.
 
+###NeoVim 
+
+This plugin has a [Neovim](https://neovim.io/) specific version, on the 'neovim' branch.
+
+if you're new to neovim, [this](https://neovim.io/doc/user/nvim_from_vim.html) has helpful info on 
+configuring nvim to use your existing vim config. 
+
+The advantage of the nvim fork is that the scope-analysis is done in a different thread than (n)vim,
+so it does not block input. This makes vim more responsive while using this plugin, especially when editing larger js files. 
+Also, since the node code is running continually in the background, it will become compiled and thus faster.
+
+####Setup
+
+* Check out the neovim branch, and install node modules:
+
+    cd vim-js-context-colors
+    git fetch -a 
+    git checkout neovim
+    cd rplugin/node 
+    npm install
+
+* The neovim version of my plugin depends on the [node-host nvim plugin](https://github.com/neovim/node-host)
+So this must be installed as well (eg. using Vundle:)
+
+    if has('nvim')
+      Plugin 'neovim/node-host'
+    endif
+
+* You also need to do `npm install` inside the node-host repo as well..
+
+* When you run nvim, you also need to do 
+
+  :UpdateRemotePlugins
+  
+command, and then restart nvim. AFAIK, this only needs to be done the first time, or after updating the plugin.
+
+* You may sometimes notice the js code appears with default highlighting for a split second.. this is a side effect of 
+the asynchronous nature of the plugin. It is more noticable on the Mac for some reason, than on Linux, and for the first file
+after starting the computer, as the node-host runtime has to startup. After that it shouldn't be noticable.
+
+
 ##License
 
 MIT -- see LICENSE file
