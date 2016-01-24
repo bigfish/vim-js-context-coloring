@@ -212,7 +212,7 @@ By default, <localleader>t is mapped to the `JSContextColorToggle` command.
 
 These are local to the buffer. They can be disabled by setting the `g:js_context_colors_usemaps` variable to 0.
 
-###Neovim 
+###NeoVim 
 
 This plugin has a [Neovim](https://neovim.io/) specific version, on the 'neovim' branch.
 
@@ -246,7 +246,7 @@ So this must be installed as well (eg. using Vundle:)
 
   :UpdateRemotePlugins
   
-command. AFAIK, this only needs to be done the first time, or after updating the plugin.
+command, and then restart nvim. AFAIK, this only needs to be done the first time, or after updating the plugin.
 
 * You may sometimes notice the js code appears with default highlighting for a split second.. this is a side effect of 
 the asynchronous nature of the plugin. It is more noticable on the Mac for some reason, than on Linux, and for the first file
