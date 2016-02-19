@@ -134,6 +134,11 @@ is .jsx this will be automatically turned on.
 
 Only support ES5 syntax. By default the plugin will now highlight ES6 syntax as well as
 ES5/ES3. This switches to the older CLI backend.
+
+                                                *g:js_context_colors_allow_jsx_syntax*
+
+Allow JSX syntax (eg. vim-jsx) to appear over scope highlighting. This must be
+installed separately, and loaded *after* this plugin.
 >
 
 ==============================================================================

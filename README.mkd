@@ -41,6 +41,7 @@ your choice. Here is a summary of the commands available:
     g:js_context_colors_jsx
     g:js_context_colors_fold
     g:js_context_colors_folding
+    g:js_context_colors_allow_jsx_syntax
 
 ##Requirements
 
@@ -178,7 +179,11 @@ If you only want to support ES5 syntax, you can set the `g:js_context_colors_es5
 ### JSX support
  
 Set the `g:js_context_colors_jsx` option to 1 to support JSX (and ES6). If the file extension
-is .jsx this will be automatically turned on.
+is .jsx this will be automatically turned on. 
+
+If you want JXS syntax to be used, overriding the scope colors, set
+`g:js_context_colors_allow_jsx_syntax` to 1. The vim-jsx or equivalent syntax must be
+loaded *after* this plugin.
 
 ### Folding
 
