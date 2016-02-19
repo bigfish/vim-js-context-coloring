@@ -8,7 +8,11 @@
 if exists("b:did_jscc_ftplugin")
   finish
 endif
+
+setlocal iskeyword+=$
+
 let b:did_jscc_ftplugin = 1
+let b:scope_groups = []
 
 let s:cli_cmd = 'jscc-cli'
 
@@ -97,6 +101,9 @@ if !exists('g:js_context_colors_debug')
     let g:js_context_colors_debug = 0
 endif
 
+if !exists('g:js_context_colors_allow_jsx_syntax')
+    let g:js_context_colors_allow_jsx_syntax = 0
+endif
 let s:max_levels = 10
 
 "parse functions
@@ -193,6 +200,16 @@ function! JSCC_DefineHighlightGroups()
     let s:jscc_highlight_groups_defined = 1
 endfunction
 
+function! JSCC_ClearScopeSyntax()
+    "clear previous scope syntax groups
+    if len(b:scope_groups)
+        for grp in b:scope_groups 
+            exe "syntax clear " . join(b:scope_groups, " ")
+        endfor
+        let b:scope_groups = []
+    endif
+endfunction
+
 function! JSCC_Colorize()
     
     "bail if not a js filetype
@@ -200,9 +217,9 @@ function! JSCC_Colorize()
         return
     endif
 
-    let s:region_count = 0
+    call JSCC_ClearScopeSyntax()
 
-    syntax clear
+    let s:region_count = 0
 
     let s:scope_level_clusters = {}
 
@@ -317,7 +334,8 @@ function! JSCC_Colorize()
 
             endfor
 
-            let contains = "contains=@jsComment,javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptTemplate_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
+            let contains = "contains=@jsComment," . (g:js_context_colors_allow_jsx_syntax ? "jsxRegion," : "") 
+                        \. "javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptTemplate_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
 
             if len(enclosed_groups)
                 let contains .= ',' . join(enclosed_groups, ',')
@@ -329,6 +347,8 @@ function! JSCC_Colorize()
             exe cmd
 
             exe 'hi link ' . scope_group . ' ' . 'JSCC_Level_' . level
+
+            call add(b:scope_groups, scope_group)
 
         endfor
 
@@ -382,6 +402,7 @@ function! JSCC_Enable()
 
     endtry
 
+
     :JSContextColor
 
 endfunction
@@ -400,12 +421,8 @@ function! JSCC_Disable()
         augroup END
     endtry
 
-    syn clear
-
-    "reinitialize syntax for this buffer
-    "since g:js_context_colors_enabled is 0
-    "it will use whatever syntax is first found in runtimepath
-    runtime! syntax/javascript.vim
+    call JSCC_ClearScopeSyntax()
+    syntax enable
 
     let s:jscc_highlight_groups_defined = 0
 endfunction
