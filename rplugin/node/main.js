@@ -228,7 +228,7 @@ function getBufferText(nv) {
 }
 
 plugin.autocmd('FileType', {
-    pattern: 'javascript'
+    pattern: 'javascript*'
 }, setConfig);
 
 plugin.autocmd('User', {
