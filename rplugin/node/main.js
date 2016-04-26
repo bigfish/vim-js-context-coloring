@@ -209,6 +209,10 @@ function getBufferText(nv) {
     //var start = (new Date()).getTime();
     nv.callFunction('JSCC_GetBufferText', [], function (err, res) {
         if (err) _debug(err);
+        if (!res) {
+          //if no result text -- quit
+          return;
+        }
 
         var scopes;
 
