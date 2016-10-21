@@ -213,7 +213,7 @@ endfunction
 function! JSCC_Colorize()
     
     "bail if not a js filetype
-    if &ft != 'javascript'
+    if stridx(&ft, 'javascript') != 0 
         return
     endif
 
