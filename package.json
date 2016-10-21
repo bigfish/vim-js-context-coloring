@@ -16,9 +16,9 @@
   "readmeFilename": "README.mkd",
   "gitHead": "617951e1806cf83d3f324687e0a2a0bb28eca47b",
   "dependencies": {
-    "uglify-js": "~2.4.15",
-    "escope": "~3.2.0",
-    "esprima": "~2.5.0",
-    "acorn-jsx": "~2.0.0"
+    "uglify-js": "2.7.3",
+    "escope": "3.6.0",
+    "esprima": "3.1.0",
+    "acorn-jsx": "3.0.1"
   }
 }
