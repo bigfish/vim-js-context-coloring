@@ -10,12 +10,12 @@
 " The actual syntax definitions are done dynamically
 " in the ftplugin/javascript.vim file.
 
-
-if &filetype == 'javascript' && exists('g:js_context_colors_enabled') && g:js_context_colors_enabled
-
-    syntax clear
+if stridx(&filetype, 'javascript') == 0  && exists('g:js_context_colors_enabled') && g:js_context_colors_enabled
 
     call JSCC_Enable()
+
+    "set syntax to javascript so another syntax for javascript isn't loaded
+    let b:current_syntax=&filetype
 
 endif
 
