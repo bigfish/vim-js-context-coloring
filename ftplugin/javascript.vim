@@ -216,6 +216,7 @@ function! JSCC_Colorize()
     if stridx(&ft, 'javascript') != 0 
         return
     endif
+    
 
     call JSCC_ClearScopeSyntax()
 
@@ -402,6 +403,7 @@ function! JSCC_Enable()
 
     endtry
 
+    syntax clear
 
     :JSContextColor
 
