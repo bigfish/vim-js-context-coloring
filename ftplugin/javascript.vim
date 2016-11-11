@@ -28,7 +28,7 @@ if b:file_ext == "jsx"
     let g:js_context_colors_jsx = 1
 endif
 
-if g:js_context_colors_jsx 
+if g:js_context_colors_jsx
     let s:cli_cmd .= ' --jsx'
 endif
 
@@ -36,7 +36,7 @@ if !exists('g:js_context_colors_block_scope')
     let g:js_context_colors_block_scope = 0
 endif
 
-if g:js_context_colors_block_scope 
+if g:js_context_colors_block_scope
     let s:cli_cmd .= ' --block-scope'
 endif
 
@@ -52,7 +52,7 @@ if g:js_context_colors_highlight_function_names
     let s:cli_cmd .= ' --highlight-function-names'
 endif
 
-if g:js_context_colors_block_scope_with_let 
+if g:js_context_colors_block_scope_with_let
     let s:cli_cmd .= ' --block-scope-with-let'
 endif
 
@@ -166,16 +166,16 @@ function! JSCC_DefineSyntaxGroups()
     syntax region  javaScriptComment        start="/\*"  end="\*/" contains=javaScriptCommentTodo fold
 
     syntax cluster jsComment contains=javaScriptComment,javaScriptLineComment
-    
+
     "allow highlighting of vars inside strings,jsx regions
     "TODO: fix issue where quote characters inside regex literals breaks highlighting
-    
+
     "for lev in range(s:max_levels)
         "exe 'syntax region  javaScriptStringD_'. lev .'        start=+"+  skip=+\\\\\|\\$"+  end=+"+ keepend'
         "exe "syntax region  javaScriptStringS_". lev ."        start=+'+  skip=+\\\\\|\\$'+  end=+'+ keepend"
         "exe "syntax region  javaScriptTemplate_". lev ."        start=+`+  skip=+\\\\\|\\$'\"+  end=+`+ keepend"
 
-        "if g:js_context_colors_jsx 
+        "if g:js_context_colors_jsx
             " Highlight JSX regions as XML; recursively match.
             "exe "syn region jsxRegion_" . lev . " contains=jsxRegion,javaScriptStringD_". lev .",javaScriptStringS_" . lev ." start=+<\\@<!<\\z([a-zA-Z][a-zA-Z0-9:\\-.]*\\)+ skip=+<!--\\_.\\{-}-->+ end=+</\\z1\\_\\s\\{-}>+ end=+/>+ keepend extend"
         "endif
@@ -184,7 +184,7 @@ function! JSCC_DefineSyntaxGroups()
         "exe 'hi link javaScriptStringD_' . lev . ' JSCC_Level_' . lev
         "exe 'hi link javaScriptTemplate_' . lev . ' JSCC_Level_' . lev
 
-        "if g:js_context_colors_jsx 
+        "if g:js_context_colors_jsx
             "exe 'hi link jsxRegion_' . lev . ' JSCC_Level_' . lev
         "endif
 
@@ -202,21 +202,20 @@ endfunction
 
 function! JSCC_ClearScopeSyntax()
     "clear previous scope syntax groups
-    if len(b:scope_groups)
-        for grp in b:scope_groups 
+    if exists('b:scope_groups') && len(b:scope_groups)
+        for grp in b:scope_groups
             exe "syntax clear " . join(b:scope_groups, " ")
         endfor
-        let b:scope_groups = []
     endif
+    let b:scope_groups = []
 endfunction
 
 function! JSCC_Colorize()
-    
+
     "bail if not a js filetype
-    if stridx(&ft, 'javascript') != 0 
+    if stridx(&ft, 'javascript') != 0
         return
     endif
-    
 
     call JSCC_ClearScopeSyntax()
 
@@ -313,16 +312,16 @@ function! JSCC_Colorize()
                         let var_syntax_group = 'JSCC_Level_' . var_level . '_' . tr(var, '$', 'S')
                     endif
 
-                    exe "syn match ". var_syntax_group . ' /\_[^.$[:alnum:]_]\zs' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group 
+                    exe "syn match ". var_syntax_group . ' /\_[^.$[:alnum:]_]\zs' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=" . scope_group
 
                     "also match ${var} inside template strings
                     exe "syn match ". var_syntax_group . ' /${\zs' . var . "\\(}\\)\\@=\\(\\s*\\:\\)\\@!/ display contained containedin=javaScriptTemplate_" . level
 
                     "also matcth {{var}} inside strings, eg handlebars
                     exe "syn match ". var_syntax_group . ' /{{\zs' . var . "\\(}}\\)\\@=\\(\\s*\\:\\)\\@!/ display contained containedin=javaScriptStringD_" . level . ",javaScriptStringS_" . level
-                    
+
                     "match {var} in jsx
-                    if g:js_context_colors_jsx 
+                    if g:js_context_colors_jsx
                         exe "syn match ". var_syntax_group . ' /\<' . var . "\\>\\(\\s*\\:\\)\\@!/ display contained containedin=jsxRegion_" . level
                     endif
 
@@ -335,7 +334,7 @@ function! JSCC_Colorize()
 
             endfor
 
-            let contains = "contains=@jsComment," . (g:js_context_colors_allow_jsx_syntax ? "jsxRegion," : "") 
+            let contains = "contains=@jsComment," . (g:js_context_colors_allow_jsx_syntax ? "jsxRegion," : "")
                         \. "javaScriptStringS_" . level . ",javaScriptStringD_" . level . ",javaScriptTemplate_" . level . ",javaScriptProp,@ScopeLevelCluster_" . (level + 1)
 
             if len(enclosed_groups)
@@ -387,7 +386,7 @@ function! JSCC_Enable()
     try
         augroup JSContextColorAug
             "remove if added previously, but only in this buffer
-            au! InsertLeave,TextChanged <buffer> 
+            au! InsertLeave,TextChanged <buffer>
             au! InsertLeave,TextChanged <buffer> :JSContextColor
         augroup END
 
@@ -397,7 +396,7 @@ function! JSCC_Enable()
 
             "use different events to trigger update in Vim < 7.4
             augroup JSContextColorAug
-                au! InsertLeave <buffer> 
+                au! InsertLeave <buffer>
                 au! InsertLeave <buffer> :JSContextColor
             augroup END
 
@@ -410,8 +409,8 @@ function! JSCC_Enable()
 endfunction
 
 function! JSCC_Disable()
-    "clear autocommands 
-    try 
+    "clear autocommands
+    try
         augroup JSContextColorAug
             au! InsertLeave,TextChanged <buffer>
         augroup END
