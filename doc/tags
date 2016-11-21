@@ -2,6 +2,8 @@
 :JSContextColorToggle	JSContextColor.txt	/*:JSContextColorToggle*
 :JSContextColorUpdate	JSContextColor.txt	/*:JSContextColorUpdate*
 JSContextColor	JSContextColor.txt	/*JSContextColor*
+after	JSContextColor.txt	/*after*
+g:js_context_colors_allow_jsx_syntax	JSContextColor.txt	/*g:js_context_colors_allow_jsx_syntax*
 g:js_context_colors_block_scope	JSContextColor.txt	/*g:js_context_colors_block_scope*
 g:js_context_colors_block_scope_with_let	JSContextColor.txt	/*g:js_context_colors_block_scope_with_let*
 g:js_context_colors_colorize_comments	JSContextColor.txt	/*g:js_context_colors_colorize_comments*

@@ -16,9 +16,12 @@
   "readmeFilename": "README.mkd",
   "gitHead": "617951e1806cf83d3f324687e0a2a0bb28eca47b",
   "dependencies": {
-    "uglify-js": "2.7.3",
+    "acorn-jsx": "3.0.1",
+    "babel-traverse": "6.18.0",
+    "babel-types": "6.18.0",
+    "babylon": "^6.13.1",
     "escope": "3.6.0",
     "esprima": "3.1.0",
-    "acorn-jsx": "3.0.1"
+    "uglify-js": "2.7.3"
   }
 }
