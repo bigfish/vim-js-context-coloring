@@ -505,7 +505,7 @@ function! JSCC_Enable()
         call JSCC_StartServer()
 
         "connect now that server is running -- give some time to start
-        call JSCC_OpenChannel(500)
+        call JSCC_OpenChannel(1000)
     endif
 
     if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'

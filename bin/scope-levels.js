@@ -64,12 +64,38 @@ function getScopeLevels(input_js, options) {
 
     //TODO: normalize ClassMethod
     traverse(ast, {
+
       ClassMethod(path) {
+        var node = path.node;
+        node.value = {
+          type: "FunctionExpression",
+          id: node.id,
+          params: node.params,
+          body: node.body,
+          async: node.async,
+          generator: node.generator,
+          expression: node.expression,
+          defaults: [],
+          start: node.start,
+          end: node.end
+        };
+      },
 
-
-
+      ObjectMethod(path) {
+        var node = path.node;
+        node.value = {
+          type: "FunctionExpression",
+          id: node.id,
+          params: node.params,
+          body: node.body,
+          async: node.async,
+          generator: node.generator,
+          expression: node.expression,
+          defaults: [],
+          start: node.start,
+          end: node.end
+        };
       }
-
     });
 
   } else if (jsx) {
