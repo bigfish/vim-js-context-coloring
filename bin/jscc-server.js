@@ -1,12 +1,7 @@
-#!/usr/bin/env node
-/*jshint node:true, strict:false*/
 
+var PORT = 6969;
+var net = require('net');
 var getScopeLevels = require('./scope-levels.js');
-var jsx = false;
-var block_scope = false;
-var block_scope_with_let = false;
-var highlight_function_names = false;
-
 var options = {
   babel: false,
   jsx: false,
@@ -14,7 +9,6 @@ var options = {
   block_scope_with_let: false,
   highlight_function_names: false
 };
-
 //handle //CLI args (just flags, no values)
 // --jsx : support JSX syntax
 // --block-scope : highlight block scope (if es6 is on)
@@ -40,23 +34,54 @@ if (process.argv.length > 2) {
     }
 }
 
-var input_js = '';
-var scopes = [];
+var server = net.createServer(function (socket) {
 
-//collect input from stdin
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
+  socket.setEncoding('utf8');
 
-process.stdin.on('data', function(chunk) {
-    input_js += chunk;
+  var input = "";
+  var scopes;
+
+  socket.on('data', (chunk) => {
+    input += chunk;
+
+    //if we got newline the text is finished
+    if (chunk.indexOf('\n') !== -1) {
+
+      try {
+        scopes = getScopeLevels(input, options);
+        socket.write(JSON.stringify({scopes: scopes}) + '\r\n');
+      } catch(err) {
+        console.log(err);
+      }
+      input = "";
+
+    }
+
+    //socket.write( 'got data' + '\r\n');
+  });
+
+  socket.on('end', () => {
+    //process input and get levels JSON
+    //return result
+    //reset input
+    //socket.write('got end of data \r\n');
+
+    var input = "";
+  });
+
+  socket.on('error', (err) => {
+    //socket.write('error' . err);
+    console.log(err);
+  });
+
+  //socket.pipe(socket);
+
 });
 
-process.stdin.on('end', function() {
+server.on('error', (err) => {
+  throw err;
+});
 
-    scopes = getScopeLevels(input_js, options);
-
-    process.stdout.write(JSON.stringify({
-            scopes: scopes
-    }));
-
+server.listen(PORT, () => {
+  console.log('server bound to port:', PORT);
 });

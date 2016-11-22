@@ -15,6 +15,8 @@ let b:did_jscc_ftplugin = 1
 let b:scope_groups = []
 
 let s:cli_cmd = 'jscc-cli'
+let s:server_cmd = 'jscc-server.js'
+let s:cli_options = ''
 
 " check options to send as CLI params
 if !exists('g:js_context_colors_jsx')
@@ -29,7 +31,7 @@ if b:file_ext == "jsx"
 endif
 
 if g:js_context_colors_jsx
-    let s:cli_cmd .= ' --jsx'
+    let s:cli_options .= ' --jsx'
 endif
 
 if !exists('g:js_context_colors_block_scope')
@@ -37,11 +39,15 @@ if !exists('g:js_context_colors_block_scope')
 endif
 
 if g:js_context_colors_block_scope
-    let s:cli_cmd .= ' --block-scope'
+    let s:cli_options .= ' --block-scope'
 endif
 
 if !exists('g:js_context_colors_block_scope_with_let')
     let g:js_context_colors_block_scope_with_let = 0
+endif
+
+if g:js_context_colors_block_scope_with_let
+    let s:cli_options .= ' --block-scope-with-let'
 endif
 
 if !exists('g:js_context_colors_highlight_function_names')
@@ -49,16 +55,17 @@ if !exists('g:js_context_colors_highlight_function_names')
 endif
 
 if g:js_context_colors_highlight_function_names
-    let s:cli_cmd .= ' --highlight-function-names'
+    let s:cli_options .= ' --highlight-function-names'
 endif
 
-if g:js_context_colors_block_scope_with_let
-    let s:cli_cmd .= ' --block-scope-with-let'
-endif
 
 "revert to old cli if es5 option is given
 if !exists('g:js_context_colors_es5')
     let g:js_context_colors_es5 = 0
+endif
+
+if g:js_context_colors_es5
+    let s:cli_cmd = 'jscc-cli-legacy'
 endif
 
 if !exists('g:js_context_colors_babel')
@@ -66,14 +73,8 @@ if !exists('g:js_context_colors_babel')
 endif
 
 if g:js_context_colors_babel
-    let s:cli_cmd .= ' --babel'
+    let s:cli_options .= ' --babel'
 endif
-
-if g:js_context_colors_es5
-    let s:cli_cmd = 'jscc-cli-legacy'
-endif
-
-let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
 
 let s:region_count = 1
 
@@ -100,7 +101,6 @@ if !exists('g:js_context_colors_foldlevel')
     let g:js_context_colors_foldlevel = 9
 endif
 
-
 if !exists('g:js_context_colors_show_error_message')
     let g:js_context_colors_show_error_message = 0
 endif
@@ -113,6 +113,19 @@ if !exists('g:js_context_colors_allow_jsx_syntax')
     let g:js_context_colors_allow_jsx_syntax = 0
 endif
 let s:max_levels = 10
+
+if !exists('g:js_context_colors_server_port')
+    let g:js_context_colors_server_port = 6969
+endif
+let s:jscc_server_url = 'localhost:' . g:js_context_colors_server_port
+
+if g:js_context_colors_es5
+    let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd
+else
+    let s:jscc = expand('<sfile>:p:h') . '/../bin/' . s:cli_cmd . s:cli_options
+endif
+
+let s:jscc_server = expand('<sfile>:p:h') . '/../bin/' . s:server_cmd . s:cli_options
 
 "parse functions
 function! Strip(input_string)
@@ -225,6 +238,40 @@ function! JSCC_ClearScopeSyntax()
     endif
 endfunction
 
+function! GetBufferText()
+    "obtain contents of buffer
+    let buflines = getline(1, '$')
+
+    "replace hashbangs (in node CLI scripts)
+    let linenum  = 0
+    for bline in buflines
+        if match(bline, '#!') == 0
+            "replace #! with // to prevent parse errors
+            "while not throwing off byte count
+            let buflines[linenum] = '//' . strpart(bline, 2)
+            break
+        endif
+        let linenum += 1
+    endfor
+    "fix offset errors caused by windows line endings
+    "since 'buflines' does NOT return the line endings
+    "we need to replace them for unix/mac file formats
+    "and for windows we replace them with a space and \n
+    "since \r does not work in node on linux, just replacing
+    "with a space will at least correct the offsets
+    if &ff == 'unix' || &ff == 'mac'
+        let buftext = join(buflines, "\n")
+    elseif &ff == 'dos'
+        let buftext = join(buflines, " \n")
+    else
+        echom 'unknown file format' . &ff
+        let buftext = join(buflines, "\n")
+    endif
+
+    return buftext
+
+endfunction
+
 function! JSCC_Colorize()
 
     "bail if not a js filetype
@@ -237,38 +284,30 @@ function! JSCC_Colorize()
         return
     endif
 
-    if has('job')
-        "start job to get colors asynchronously with input of current buffer
-        let job = job_start(s:jscc, {"in_io": "buffer", "in_name": bufname('%'), "out_mode": "nl", "out_cb": "JSCC_Colorize2", "err_cb": "JSCC_ColorizeError"})
-    else
-        "obtain contents of buffer
-        let buflines = getline(1, '$')
+    "use server channel if its open
+    if exists('g:jscc_channel') && ch_status(g:jscc_channel) == "open"
 
-        "replace hashbangs (in node CLI scripts)
-        let linenum  = 0
-        for bline in buflines
-            if match(bline, '#!') == 0
-                "replace #! with // to prevent parse errors
-                "while not throwing off byte count
-                let buflines[linenum] = '//' . strpart(bline, 2)
-                break
-            endif
-            let linenum += 1
-        endfor
-        "fix offset errors caused by windows line endings
-        "since 'buflines' does NOT return the line endings
-        "we need to replace them for unix/mac file formats
-        "and for windows we replace them with a space and \n
-        "since \r does not work in node on linux, just replacing
-        "with a space will at least correct the offsets
-        if &ff == 'unix' || &ff == 'mac'
-            let buftext = join(buflines, "\n")
-        elseif &ff == 'dos'
-            let buftext = join(buflines, " \n")
-        else
-            echom 'unknown file format' . &ff
-            let buftext = join(buflines, "\n")
+        let buftext = GetBufferText()
+
+        "noop if empty string
+        if Strip(buftext) == ''
+            return
         endif
+
+	      call ch_sendraw(g:jscc_channel, buftext . '
+                    \', {'callback': 'JSCC_Colorize2'})
+
+    elseif has('job')
+        "if the server job doesn't work, this method can be used..
+        "start job to get colors asynchronously with input of current buffer
+        "if exists('g:jscc_job')
+            "echom job_status(g:jscc_job)
+        "else
+            "let g:jscc_job = job_start(s:jscc, {"in_io": "buffer", "in_name": bufname('%'), "out_mode": "nl", "out_cb": "JSCC_Colorize2", "err_cb": "JSCC_ColorizeError"})
+        "endif
+    else
+
+        let buftext = GetBufferText()
 
         "noop if empty string
         if Strip(buftext) == ''
@@ -298,7 +337,7 @@ function! JSCC_Colorize()
 
 endfunction
 
-function JSCC_ColorizeError(channel, err)
+function! JSCC_ColorizeError(channel, err)
 
     if g:js_context_colors_show_error_message || g:js_context_colors_debug
         echom "Syntax Error [JSContextColors]"
@@ -457,12 +496,34 @@ function! JSCC_Enable()
 
     syntax clear
 
+    "try to connect to server with a channel
+    call JSCC_OpenChannel(0)
+
+    "start server job if unable to connect
+    if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
+
+        call JSCC_StartServer()
+
+        "connect now that server is running -- give some time to start
+        call JSCC_OpenChannel(500)
+    endif
+
+    if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
+        echom 'Failed to connect to jscc server, status: ' .  ch_status(g:jscc_channel)
+    endif
+
     :JSContextColor
 
 endfunction
 
-function! HandleChannelResponse(channel, msg)
-    echo 'Received: ' . a:msg
+function! JSCC_OpenChannel(wait)
+    let g:jscc_channel = ch_open(s:jscc_server_url, {'mode': 'nl',
+                \'waittime': a:wait,
+                \'callback': 'JSCC_Colorize2'})
+endfunction
+
+function! JSCC_StartServer()
+	  let s:jscc_server_job = job_start(["/bin/sh", "-c", "node " . s:jscc_server])
 endfunction
 
 function! JSCC_Disable()
