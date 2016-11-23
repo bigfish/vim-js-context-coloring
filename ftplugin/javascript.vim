@@ -497,15 +497,22 @@ function! JSCC_Enable()
     syntax clear
 
     "try to connect to server with a channel
-    call JSCC_OpenChannel(0)
+    let connected = JSCC_OpenChannel(0)
+    let tries = 1
 
     "start server job if unable to connect
-    if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
+    if !connected
 
         call JSCC_StartServer()
 
-        "connect now that server is running -- give some time to start
-        call JSCC_OpenChannel(1000)
+        while !connected
+            let connected = JSCC_OpenChannel(100)
+            let tries += 1
+            if tries > 20
+                break
+            endif
+        endwhile
+
     endif
 
     if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
@@ -516,10 +523,16 @@ function! JSCC_Enable()
 
 endfunction
 
+"returns 1 if successful, 0 if not
 function! JSCC_OpenChannel(wait)
     let g:jscc_channel = ch_open(s:jscc_server_url, {'mode': 'nl',
                 \'waittime': a:wait,
                 \'callback': 'JSCC_Colorize2'})
+    if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
+        return 0
+    else
+        return 1
+    endif
 endfunction
 
 function! JSCC_StartServer()
