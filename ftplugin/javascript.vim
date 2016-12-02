@@ -230,12 +230,14 @@ endfunction
 
 function! JSCC_ClearScopeSyntax()
     "clear previous scope syntax groups
-    if len(b:scope_groups)
-        for grp in b:scope_groups
-            exe "syntax clear " . join(b:scope_groups, " ")
-        endfor
-        let b:scope_groups = []
-    endif
+    syn clear
+
+    "if len(b:scope_groups)
+        "for grp in b:scope_groups
+            "exe "syntax clear " . join(b:scope_groups, " ")
+        "endfor
+        "let b:scope_groups = []
+    "endif
 endfunction
 
 function! GetBufferText()
@@ -515,7 +517,7 @@ function! JSCC_Enable()
 
     endif
 
-    if ch_status(g:jscc_channel) == 'fail' || ch_status(g:jscc_channel) == 'closed'
+    if !connected
         echom 'Failed to connect to jscc server, status: ' .  ch_status(g:jscc_channel)
     endif
 
